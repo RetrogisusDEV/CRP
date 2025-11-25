@@ -1,79 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 
 <head>
-  <title>RPCG</title> <!-- Changed title to RPCG -->
+  <title>CPR</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" as="style">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Babylon.js -->
+  <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+  <script src="https://cdn.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+  <script src="https://cdn.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
+  <script src="https://cdn.babylonjs.com/proceduralTexturesLibrary/babylonjs.proceduralTextures.min.js"></script>
+  <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+  
   <style>
-    /* Import Google Font Inter */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-
-    /* CSS variables for pastel colors and dark theme */
+    /* Variables CSS personalizadas para mantener compatibilidad */
     :root {
       --background-dark: #0a0a0a;
       --hud-background-dark: #1f1f1f;
-      --main-border-color: #AECAD2; /* Pastel blue for main border, used consistently */
+      --main-border-color: #AECAD2;
     }
-
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background-color: var(--background-dark);
-      color: white;
-      font-family: 'Inter', sans-serif;
-      margin: 0;
-      touch-action: none; /* Disable default touch actions like scrolling */
-      overflow: hidden; /* Hide overflow to prevent scrollbars */
-      width: 100vw; /* Occupy full viewport width */
-      height: 100vh; /* Occupy full viewport height */
-      justify-content: center;
-      position: relative;
-    }
-
-    /* Main game canvas now covers the entire screen */
-    canvas { 
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      display: block;
-      z-index: 1; /* Lowest Z-index, as it's the primary drawing surface */
-      background-color: transparent; /* Background drawn by canvas itself */
-    }
-
-    #hud {
-      display: flex;
-      gap: 15px;
-      margin-top: 10px; /* Small margin from top */
-      flex-wrap: wrap;
-      justify-content: center;
-      z-index: 5; /* HUD above canvas and menu */
-      position: absolute; /* Position above canvas */
-      top: 20px; /* Position from top */
-      width: 100%; /* Take full width to center items */
-    }
-
-    .hud-item {
-      font-size: 18px;
-      background: rgba(31, 31, 31, 0.9); /* Add transparency */
-      padding: 8px 15px;
-      border-radius: 8px;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); /* Better contrast */
-      backdrop-filter: blur(5px); /* Frosted glass effect */
-      -webkit-backdrop-filter: blur(5px); /* For Safari */
-      border: 2px solid rgba(255, 255, 255, 0.15); /* Slightly thinner border for better aesthetics with transparency */
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-      transition: all 0.2s ease-out;
-    }
-
-    /* Class for HUD pulse animation */
-    .hud-item.animate-pulse {
-      animation: hudPulseFlat 0.3s ease-out forwards;
-    }
-
+    
+    /* Animaciones personalizadas */
     @keyframes hudPulseFlat {
       0%, 100% { 
           transform: scale(1);
@@ -81,424 +30,215 @@
           color: white;
       }
       50% { 
-          transform: scale(1.05); /* Slightly increased scale for more noticeable pulse */
+          transform: scale(1.05);
           background-color: #FFECB3; 
           color: black;
       }
     }
-
-    /* Menu Styles (Start and Settings, and Pause) */
-    .game-menu {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 4;
-      background-color: rgba(31, 31, 31, 0.95); /* Consistent with settings-group */
-      border-radius: 12px; /* Consistent with settings-group */
-      border: 2px solid rgba(255, 255, 255, 0.1); /* Consistent with settings-group */
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Consistent with settings-group */
-      text-align: center;
-      transition: opacity 0.3s ease;
-    }
-
-    .game-menu.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .game-menu h1 {
-      font-size: clamp(2em, 8vw, 4em);
-      color: white;
-      margin-bottom: clamp(10px, 4vw, 30px);
-      text-shadow: none;
-    }
-
-    .menu-option-button {
-      padding: clamp(8px, 3vw, 16px) clamp(16px, 6vw, 32px); /* Optimized with clamp() */
-      font-size: clamp(14px, 4vw, 18px); /* Optimized with clamp() */
-      background-color: #C3F8B7;
-      color: #1a1a1a;
-      border: 6px solid var(--main-border-color); /* Increased border size and consistent color */
-      border-radius: 15px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: bold;
-      text-shadow: none;
-      margin: 8px 0;
-      width: clamp(200px, 60vw, 300px);
-      max-width: 90%;
-    }
-
-    .menu-option-button:hover {
-      background-color: #AECAD2;
-      color: white;
-      border-color: #FFD1DC;
-      transform: scale(1.05);
-    }
-
-    .info-text {
-      text-align: center;
-      padding: 10px;
-      color: #aaa;
-      font-size: clamp(0.8em, 2vw, 1.1em);
-      text-shadow: none;
-      z-index: 5;
-      position: absolute;
-      bottom: 20px;
-      width: 100%;
-    }
-
-    /* Styles for settings options */
-    .settings-group {
-        margin-bottom: 25px;
-        color: #ddd;
-        background-color: rgba(31, 31, 31, 0.7); /* Semi-transparent background */
-        padding: 20px;
-        border-radius: 12px;
-        border: 2px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        width: clamp(280px, 80vw, 500px); /* Responsive width */
-        max-width: 90%;
-        box-sizing: border-box; /* Include padding in width */
-    }
-    .settings-group h2 {
-        font-size: clamp(1.2em, 5vw, 2.2em);
-        margin-bottom: 15px;
-        color: white;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    }
-    .settings-options {
-        display: flex;
-        flex-wrap: wrap; /* Allow buttons to wrap to next line */
-        justify-content: center;
-        gap: 10px; /* Space between buttons */
-    }
-    .settings-options button {
-        background-color: var(--hud-background-dark);
-        color: white;
-        border: 4px solid rgba(255, 255, 255, 0.1); /* Increased border size */
-        padding: 8px 15px;
-        border-radius: 5px;
-        cursor: pointer;
-        margin: 0; /* Reset margin from parent */
-        transition: all 0.2s ease;
-        flex-grow: 1; /* Allow buttons to grow and fill space */
-        min-width: 100px; /* Minimum width for buttons */
-        max-width: 150px; /* Max width for buttons */
-    }
-    .settings-options button:hover {
-        background-color: #555;
-    }
-    .settings-options button.active {
-        background-color: #C3F8B7; /* Active pastel green */
-        color: #1a1a1a;
-        border-color: var(--main-border-color); /* Consistent border color */
-        box-shadow: 0 0 8px var(--main-border-color); /* Glow for active button */
-    }
-
-    /* Adjustments for Settings Menu to allow scrolling */
-    #settingsMenu {
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start; /* Align content to the top */
-      padding-top: 5vh; /* Add some padding at the top */
-      padding-bottom: 5vh; /* Add some padding at the bottom */
-      overflow-y: auto; /* Enable vertical scrolling */
-      max-height: 90vh; /* Restrict height to enable scrolling if content overflows */
-      box-sizing: border-box; /* Include padding in the height calculation */
-      align-items: center; /* Center groups horizontally */
-      gap: 20px; /* Space between setting groups */
-    }
-
-    /* Modal styles for custom alert */
-    .modal {
-        display: none; /* Hidden by default */
-        position: fixed; /* Stay in place */
-        z-index: 100; /* Sit on top */
-        left: 0;
-        top: 0;
-        width: 100%; /* Full width */
-        height: 100%; /* Full height */
-        overflow: auto; /* Enable scroll if needed */
-        background-color: rgba(0,0,0,0.7); /* Black w/ opacity */
-        justify-content: center;
-        align-items: center;
-    }
-
-    .modal-content {
-        background-color: #1f1f1f;
-        margin: auto;
-        padding: 30px;
-        border: 5px solid var(--main-border-color);
-        border-radius: 15px;
-        width: 80%;
-        max-width: 400px;
-        text-align: center;
-        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .modal-content h2 {
-        color: white;
-        font-size: 1.8em;
-    }
-
-    .modal-content p {
-        color: #ddd;
-        font-size: 1.1em;
-        white-space: pre-wrap; /* Preserve new lines from alert content */
-    }
-
-    .modal-content button {
-        background-color: #C3F8B7;
-        color: #1a1a1a;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 1.1em;
-        font-weight: bold;
-        transition: background-color 0.2s ease;
-    }
-
-    .modal-content button:hover {
-        background-color: #AECAD2;
-        color: white;
-    }
-
-    /* New styles for score screen */
-    #scoreScreen {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        z-index: 4;
-        background-color: rgba(31, 31, 31, 0.95); /* Consistent with settings-group */
-        border-radius: 12px; /* Consistent with settings-group */
-        border: 2px solid rgba(255, 255, 255, 0.1); /* Consistent with settings-group */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Consistent with settings-group */
-        text-align: center;
-        transition: opacity 0.3s ease;
-    }
-
-    #scoreScreen.hidden {
-        opacity: 0;
-        pointer-events: none;
-    }
-
-    #scoreScreen h1 {
-        font-size: clamp(2em, 8vw, 4em);
-        color: white;
-        margin-bottom: clamp(10px, 4vw, 30px);
-    }
-
-    #scoreScreen p {
-        font-size: clamp(1.2em, 5vw, 2em);
-        color: #ddd;
-        margin-bottom: 15px;
-    }
-
-    #scoreScreen .menu-option-button {
-        margin-top: 20px;
-    }
-
-    /* Styles for intro animation text */
-    #introAnimationText {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: clamp(2em, 10vw, 5em);
-        color: white;
-        text-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
-        opacity: 0;
-        z-index: 6; /* Above menus */
-        pointer-events: none;
-    }
-
-    /* Class to trigger intro animation */
-    #introAnimationText.animate-intro {
-        animation: fadeInOut 2s ease-out forwards;
-    }
-
+    
     @keyframes fadeInOut {
         0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
         50% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
     }
-
-    /* Orientation warning message */
-    #orientationWarning {
-        display: none; /* Hidden by default */
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: rgba(0, 0, 0, 0.95);
-        color: white;
-        font-size: clamp(1em, 5vw, 2em);
-        text-align: center;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-        flex-direction: column;
-        padding: 20px;
+    
+    /* Clases utilitarias adicionales */
+    .animate-hud-pulse {
+      animation: hudPulseFlat 0.3s ease-out forwards;
     }
-
-    @media screen and (orientation: landscape) and (max-height: 500px) { /* Adjust breakpoint as needed */
-        #orientationWarning {
-            display: flex;
-        }
+    
+    .animate-fade-in-out {
+      animation: fadeInOut 2s ease-out forwards;
     }
-    @media screen and (orientation: portrait) and (max-width: 500px) { /* Adjust breakpoint as needed */
-        #orientationWarning {
-            display: none; /* Hide for portrait on small screens */
-        }
+    
+    /* Asegurar que el canvas de Babylon ocupe toda la pantalla */
+    #renderCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      outline: none;
     }
-
   </style>
 </head>
 
-<body>
-  <div id="startMenu" class="game-menu">
-    <h1>RPCG</h1> <!-- Changed title to RPCG -->
-    <button id="playButton" class="menu-option-button">Jugar</button>
-    <button id="settingsButton" class="menu-option-button">Configuración</button>
-    <button id="aboutButton" class="menu-option-button">Acerca de</button>
-    <p style="color: #ccc; margin-top: 20px;">Presiona SPACE para jugar</p>
+<body class="bg-black text-white font-sans overflow-hidden m-0 p-0 w-screen h-screen">
+  <!-- Canvas de Babylon.js -->
+  <canvas id="renderCanvas" class="absolute top-0 left-0 w-full h-full z-0"></canvas>
+  
+  <!-- HUD del juego -->
+  <div id="hud" class="absolute top-5 left-0 w-full flex flex-wrap gap-4 justify-center z-10">
+    <div class="hud-item bg-gray-800 bg-opacity-90 px-4 py-2 rounded-lg text-white text-lg backdrop-blur-sm border border-white border-opacity-15 shadow-lg transition-all duration-200">
+      Puntuación: <span id="score">0</span>
+    </div>
+    <div class="hud-item bg-gray-800 bg-opacity-90 px-4 py-2 rounded-lg text-white text-lg backdrop-blur-sm border border-white border-opacity-15 shadow-lg transition-all duration-200">
+      BPM: <span id="bpm">0</span>
+    </div>
+    <div class="hud-item bg-gray-800 bg-opacity-90 px-4 py-2 rounded-lg text-white text-lg backdrop-blur-sm border border-white border-opacity-15 shadow-lg transition-all duration-200">
+      Precisión: <span id="accuracy">100%</span>
+    </div>
+    <div class="hud-item bg-gray-800 bg-opacity-90 px-4 py-2 rounded-lg text-white text-lg backdrop-blur-sm border border-white border-opacity-15 shadow-lg transition-all duration-200">
+      Combo: <span id="combo">0</span>
+    </div>
   </div>
-
-  <div id="settingsMenu" class="game-menu hidden">
-    <h1>Configuración</h1>
-
-    <div class="settings-group">
-        <h2>Renderizado</h2>
-        <div class="settings-options">
-            <button id="renderer2d" class="active">Canvas 2D</button>
-            <button id="rendererWebGL">WebGL</button>
-        </div>
-    </div>
-
-    <div class="settings-group">
-        <h2>Gráficos</h2>
-        <div class="settings-options">
-            <button id="graphicsLow">Baja</button>
-            <button id="graphicsMedium" class="active">Media</button>
-            <button id="graphicsHigh">Alta</button>
-        </div>
-    </div>
-
-    <div class="settings-group">
-        <h2>Dificultad</h2>
-        <div class="settings-options">
-            <button id="difficultyEasy">Fácil</button>
-            <button id="difficultyNormal" class="active">Normal</button>
-            <button id="difficultyHard">Difícil</button>
-        </div>
-    </div>
-
-    <div class="settings-group">
-        <h2>Shaders</h2>
-        <div class="settings-options">
-            <button id="shaderOff" class="active">Off</button>
-            <button id="shaderInvert">Inversión de Color</button>
-            <button id="shaderChromaticGlow">Aberración Cromática y Brillo</button>
-        </div>
-    </div>
-
-    <div class="settings-group">
-        <h2>Modo de Color</h2> <!-- New Color Mode setting -->
-        <div class="settings-options">
-            <button id="colorModePerRound">Por Ronda</button>
-            <button id="colorModeRainbow" class="active">Arcoíris</button>
-            <button id="colorModeMonochromatic">Monocromático</button> <!-- New Monochromatic button -->
-        </div>
-    </div>
-
-    <div class="settings-group">
-        <h2>Anti-Aliasing (Canvas 2D)</h2>
-        <div class="settings-options">
-            <button id="imageSmoothingSmooth" class="active">Suave</button>
-            <button id="imageSmoothingPixelated">Píxel</button>
-        </div>
-    </div>
-
-    <div class="settings-group">
-        <h2>Anti-Aliasing (WebGL)</h2>
-        <div class="settings-options">
-            <button id="antiAliasingNone" class="active">Ninguno</button>
-            <button id="antiAliasingMSAAx2">MSAA x2</button>
-            <button id="antiAliasingFXAA">FXAA</button>
-        </div>
-    </div>
-
-    <button id="backToMainMenuButton" class="menu-option-button">Volver</button>
+  
+  <!-- Menú principal -->
+  <div id="startMenu" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-800 bg-opacity-95 z-20">
+    <h1 class="text-4xl md:text-6xl font-bold mb-8 text-white">CPR</h1>
+    <button id="playButton" class="bg-green-300 text-gray-900 border-4 border-blue-200 rounded-xl cursor-pointer transition-all duration-300 hover:bg-blue-200 hover:text-white hover:border-pink-200 transform hover:scale-105 font-bold text-lg md:text-xl px-8 py-4 my-2 w-64 max-w-full">
+      Jugar
+    </button>
+    <button id="settingsButton" class="bg-green-300 text-gray-900 border-4 border-blue-200 rounded-xl cursor-pointer transition-all duration-300 hover:bg-blue-200 hover:text-white hover:border-pink-200 transform hover:scale-105 font-bold text-lg md:text-xl px-8 py-4 my-2 w-64 max-w-full">
+      Configuración
+    </button>
+    <button id="aboutButton" class="bg-green-300 text-gray-900 border-4 border-blue-200 rounded-xl cursor-pointer transition-all duration-300 hover:bg-blue-200 hover:text-white hover:border-pink-200 transform hover:scale-105 font-bold text-lg md:text-xl px-8 py-4 my-2 w-64 max-w-full">
+      Acerca de
+    </button>
+    <p class="text-gray-300 mt-5 text-sm md:text-base">Presiona SPACE para jugar</p>
   </div>
-
-  <!-- New Pause Menu -->
-  <div id="pauseMenu" class="game-menu hidden">
-    <h1>Juego Pausado</h1>
-    <button id="continueButton" class="menu-option-button">Continuar</button>
-    <button id="restartButton" class="menu-option-button">Reiniciar</button>
-    <button id="exitToMenuButton" class="menu-option-button">Salir al Menú Principal</button>
+  
+  <!-- Menú de configuración -->
+  <div id="settingsMenu" class="absolute inset-0 bg-gray-800 bg-opacity-95 z-20 hidden overflow-y-auto py-10">
+    <div class="container mx-auto px-4 max-w-4xl">
+      <h1 class="text-4xl md:text-6xl font-bold mb-8 text-white text-center">Configuración</h1>
+      
+      <div class="bg-gray-700 bg-opacity-70 p-6 rounded-xl border border-white border-opacity-10 shadow-lg mb-6">
+        <h2 class="text-xl md:text-2xl font-bold mb-4 text-white">Renderizado</h2>
+        <div class="flex flex-wrap gap-2 justify-center">
+          <button id="rendererStandard" class="bg-gray-600 text-white border-2 border-gray-500 px-4 py-2 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-500 active:bg-green-300 active:text-gray-900 active:border-blue-200">
+            Estándar
+          </button>
+          <button id="rendererEnhanced" class="bg-gray-600 text-white border-2 border-gray-500 px-4 py-2 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-500 active:bg-green-300 active:text-gray-900 active:border-blue-200">
+            Mejorado
+          </button>
+        </div>
+      </div>
+      
+      <div class="bg-gray-700 bg-opacity-70 p-6 rounded-xl border border-white border-opacity-10 shadow-lg mb-6">
+        <h2 class="text-xl md:text-2xl font-bold mb-4 text-white">Calidad Gráfica</h2>
+        <div class="flex flex-wrap gap-2 justify-center">
+          <button id="graphicsLow" class="bg-gray-600 text-white border-2 border-gray-500 px-4 py-2 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-500 active:bg-green-300 active:text-gray-900 active:border-blue-200">
+            Baja
+          </button>
+          <button id="graphicsMedium" class="bg-green-300 text-gray-900 border-2 border-blue-200 px-4 py-2 rounded-lg cursor-pointer transition-all duration-200">
+            Media
+          </button>
+          <button id="graphicsHigh" class="bg-gray-600 text-white border-2 border-gray-500 px-4 py-2 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-500 active:bg-green-300 active:text-gray-900 active:border-blue-200">
+            Alta
+          </button>
+        </div>
+      </div>
+      
+      <div class="bg-gray-700 bg-opacity-70 p-6 rounded-xl border border-white border-opacity-10 shadow-lg mb-6">
+        <h2 class="text-xl md:text-2xl font-bold mb-4 text-white">Dificultad</h2>
+        <div class="flex flex-wrap gap-2 justify-center">
+          <button id="difficultyEasy" class="bg-gray-600 text-white border-2 border-gray-500 px-4 py-2 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-500 active:bg-green-300 active:text-gray-900 active:border-blue-200">
+            Fácil
+          </button>
+          <button id="difficultyNormal" class="bg-green-300 text-gray-900 border-2 border-blue-200 px-4 py-2 rounded-lg cursor-pointer transition-all duration-200">
+            Normal
+          </button>
+          <button id="difficultyHard" class="bg-gray-600 text-white border-2 border-gray-500 px-4 py-2 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-500 active:bg-green-300 active:text-gray-900 active:border-blue-200">
+            Difícil
+          </button>
+        </div>
+      </div>
+      
+      <div class="bg-gray-700 bg-opacity-70 p-6 rounded-xl border border-white border-opacity-10 shadow-lg mb-6">
+        <h2 class="text-xl md:text-2xl font-bold mb-4 text-white">Efectos</h2>
+        <div class="flex flex-wrap gap-2 justify-center">
+          <button id="shaderOff" class="bg-green-300 text-gray-900 border-2 border-blue-200 px-4 py-2 rounded-lg cursor-pointer transition-all duration-200">
+            Off
+          </button>
+          <button id="shaderBloom" class="bg-gray-600 text-white border-2 border-gray-500 px-4 py-2 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-500 active:bg-green-300 active:text-gray-900 active:border-blue-200">
+            Bloom
+          </button>
+          <button id="shaderGlow" class="bg-gray-600 text-white border-2 border-gray-500 px-4 py-2 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-500 active:bg-green-300 active:text-gray-900 active:border-blue-200">
+            Glow
+          </button>
+        </div>
+      </div>
+      
+      <div class="bg-gray-700 bg-opacity-70 p-6 rounded-xl border border-white border-opacity-10 shadow-lg mb-6">
+        <h2 class="text-xl md:text-2xl font-bold mb-4 text-white">Modo de Color</h2>
+        <div class="flex flex-wrap gap-2 justify-center">
+          <button id="colorModePerRound" class="bg-gray-600 text-white border-2 border-gray-500 px-4 py-2 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-500 active:bg-green-300 active:text-gray-900 active:border-blue-200">
+            Por Ronda
+          </button>
+          <button id="colorModeRainbow" class="bg-green-300 text-gray-900 border-2 border-blue-200 px-4 py-2 rounded-lg cursor-pointer transition-all duration-200">
+            Arcoíris
+          </button>
+          <button id="colorModeMonochromatic" class="bg-gray-600 text-white border-2 border-gray-500 px-4 py-2 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-500 active:bg-green-300 active:text-gray-900 active:border-blue-200">
+            Monocromático
+          </button>
+        </div>
+      </div>
+      
+      <div class="text-center mt-8">
+        <button id="backToMainMenuButton" class="bg-green-300 text-gray-900 border-4 border-blue-200 rounded-xl cursor-pointer transition-all duration-300 hover:bg-blue-200 hover:text-white hover:border-pink-200 transform hover:scale-105 font-bold text-lg md:text-xl px-8 py-4 my-2 w-64 max-w-full">
+          Volver
+        </button>
+      </div>
+    </div>
   </div>
-
-  <!-- New Score Screen -->
-  <div id="scoreScreen" class="game-menu hidden">
-    <h1>Resultados Finales</h1>
-    <p>Puntuación: <span id="finalScore">0</span></p>
-    <p>Precisión: <span id="finalAccuracy">0%</span></p>
-    <p>Clasificación: <span id="finalRank">E</span></p>
-    <button id="playAgainButton" class="menu-option-button">Jugar de Nuevo</button>
+  
+  <!-- Menú de pausa -->
+  <div id="pauseMenu" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-800 bg-opacity-95 z-20 hidden">
+    <h1 class="text-4xl md:text-6xl font-bold mb-8 text-white">Juego Pausado</h1>
+    <button id="continueButton" class="bg-green-300 text-gray-900 border-4 border-blue-200 rounded-xl cursor-pointer transition-all duration-300 hover:bg-blue-200 hover:text-white hover:border-pink-200 transform hover:scale-105 font-bold text-lg md:text-xl px-8 py-4 my-2 w-64 max-w-full">
+      Continuar
+    </button>
+    <button id="restartButton" class="bg-green-300 text-gray-900 border-4 border-blue-200 rounded-xl cursor-pointer transition-all duration-300 hover:bg-blue-200 hover:text-white hover:border-pink-200 transform hover:scale-105 font-bold text-lg md:text-xl px-8 py-4 my-2 w-64 max-w-full">
+      Reiniciar
+    </button>
+    <button id="exitToMenuButton" class="bg-green-300 text-gray-900 border-4 border-blue-200 rounded-xl cursor-pointer transition-all duration-300 hover:bg-blue-200 hover:text-white hover:border-pink-200 transform hover:scale-105 font-bold text-lg md:text-xl px-8 py-4 my-2 w-64 max-w-full">
+      Salir al Menú Principal
+    </button>
   </div>
-
-  <div id="hud">
-    <div class="hud-item">Puntuación: <span id="score">0</span></div>
-    <div class="hud-item">BPM: <span id="bpm">0</span></div>
-    <div class="hud-item">Precisión: <span id="accuracy">100%</span></div>
-    <div class="hud-item">Combo: <span id="combo">0</span></div>
+  
+  <!-- Pantalla de puntuación -->
+  <div id="scoreScreen" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-800 bg-opacity-95 z-20 hidden">
+    <h1 class="text-4xl md:text-6xl font-bold mb-8 text-white">Resultados Finales</h1>
+    <p class="text-xl md:text-3xl mb-4">Puntuación: <span id="finalScore">0</span></p>
+    <p class="text-xl md:text-3xl mb-4">Precisión: <span id="finalAccuracy">0%</span></p>
+    <p class="text-xl md:text-3xl mb-8">Clasificación: <span id="finalRank">E</span></p>
+    <button id="playAgainButton" class="bg-green-300 text-gray-900 border-4 border-blue-200 rounded-xl cursor-pointer transition-all duration-300 hover:bg-blue-200 hover:text-white hover:border-pink-200 transform hover:scale-105 font-bold text-lg md:text-xl px-8 py-4 my-2 w-64 max-w-full">
+      Jugar de Nuevo
+    </button>
   </div>
-  <canvas id="gameCanvas"></canvas> <!-- Main game canvas, now full screen -->
-  <div class="info-text" id="gameInfoText"> <!-- Added ID for easier manipulation -->
+  
+  <!-- Texto informativo del juego -->
+  <div class="info-text absolute bottom-5 w-full text-center text-gray-400 text-sm md:text-base z-10">
     Presiona SPACE o toca cuando los círculos coincidan
   </div>
-
-  <!-- Intro Animation Text -->
-  <div id="introAnimationText" class="hidden">¡Prepárate!</div>
-
-  <!-- Custom Modal for Alerts -->
-  <div id="customAlertModal" class="modal">
-      <div class="modal-content">
-          <h2 id="customAlertTitle"></h2>
-          <p id="customAlertMessage"></p>
-          <button id="customAlertCloseButton">OK</button>
-      </div>
+  
+  <!-- Texto de animación de introducción -->
+  <div id="introAnimationText" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-4xl md:text-6xl text-white text-center z-30 opacity-0 pointer-events-none">
+    ¡Prepárate!
   </div>
-
-  <!-- Orientation Warning -->
-  <div id="orientationWarning">
-      <p>Para una mejor experiencia de juego, por favor, rota tu dispositivo a orientación vertical.</p>
-      <p>(O asegúrate de que tu pantalla no sea demasiado ancha en modo horizontal)</p>
+  
+  <!-- Modal de alerta personalizado -->
+  <div id="customAlertModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-40 hidden">
+    <div class="bg-gray-800 p-8 rounded-xl border-4 border-blue-200 shadow-2xl max-w-md w-4/5 text-center">
+      <h2 id="customAlertTitle" class="text-2xl font-bold mb-4 text-white"></h2>
+      <p id="customAlertMessage" class="text-gray-300 mb-6"></p>
+      <button id="customAlertCloseButton" class="bg-green-300 text-gray-900 border-2 border-blue-200 rounded-lg cursor-pointer px-6 py-2 font-bold transition-all duration-200 hover:bg-blue-200 hover:text-white">
+        OK
+      </button>
+    </div>
+  </div>
+  
+  <!-- Advertencia de orientación -->
+  <div id="orientationWarning" class="fixed inset-0 bg-black flex flex-col items-center justify-center z-50 p-5 hidden">
+    <p class="text-xl md:text-3xl text-white text-center mb-4">
+      Para una mejor experiencia de juego, por favor, rota tu dispositivo a orientación vertical.
+    </p>
+    <p class="text-lg md:text-xl text-gray-300 text-center">
+      (O asegúrate de que tu pantalla no sea demasiado ancha en modo horizontal)
+    </p>
   </div>
 
   <script>
-    // --- Constants and Configuration ---
-    // Game precision base settings (thresholds are in degrees).
-    // Values have been reduced for stricter precision.
+    // --- Constantes y Configuración ---
     const BASE_PRECISION = {
       NANO: { threshold: 1.0, score: 350, color: '#AECAD2', text: 'NANO!' },
       PERFECT: { threshold: 2.5, score: 300, color: '#C3F8B7', text: 'PERFECT!' },
@@ -508,30 +248,18 @@
       MISS: { threshold: Infinity, score: 0, color: '#FF7F7F', text: 'MISS' }
     };
 
-    // Difficulty multipliers for precision thresholds
     const DIFFICULTY_MULTIPLIERS = {
-        'easy': 1.5,   // Wider threshold, easier to hit
-        'normal': 1.0, // Base threshold
-        'hard': 0.7    // Narrower threshold, harder to hit
+      'easy': 1.5,
+      'normal': 1.0,
+      'hard': 0.7
     };
 
-    // Graphics settings: (num_background_squares, particles_count, num_background_lines)
     const GRAPHICS_SETTINGS = {
-        'low': { squares: 20, particles: 10, lines: 10 },
-        'medium': { squares: 70, particles: 35, lines: 35 },
-        'high': { squares: 150, particles: 100, lines: 60 }
+      'low': { particles: 10, effects: false },
+      'medium': { particles: 35, effects: true },
+      'high': { particles: 100, effects: true }
     };
 
-    const TRAIL_LENGTH = 20;
-    const HIT_TEXT_LIFETIME = 900;
-    const TRIANGLE_COUNT_MAIN_CIRCLE = 16;
-    const TRIANGLE_SIZE_MAIN = 0.05;
-
-    const COMBO_TEXT_LIFETIME = 1500; // Duration for "COMBO X!" text
-    const ROUND_COMPLETE_TEXT_LIFETIME = 2000; // 2 seconds for "ROUND X COMPLETED!" text
-    const INTRO_ANIMATION_DURATION = 2000; // 2 seconds for intro animation
-
-    // Pastel color palette
     const PASTEL_COLORS = [
       '#FFD1DC', // Pastel Pink
       '#BCE2E8', // Pastel Blue
@@ -540,158 +268,8 @@
       '#D5B8FF', // Pastel Lavender
       '#FFECB3'  // Pastel Peach
     ];
-    let currentColorIndex = 0;
-    let colorUpdateIntervalId; // To store the interval ID for color updates
 
-    // Global variables for background elements and particles count,
-    // which will be updated by graphics settings
-    let NUM_BACKGROUND_SQUARES = GRAPHICS_SETTINGS.medium.squares;
-    let PARTICLES_COUNT = GRAPHICS_SETTINGS.medium.particles;
-    let NUM_BACKGROUND_LINES = GRAPHICS_SETTINGS.medium.lines;
-
-    // --- Optimization Constants ---
-    const MAX_PARTICLES = 200; // Max number of particles at any given time
-    const MAX_FEEDBACK_TEXTS = 20; // Max number of hit/combo/round texts at any given time
-    const DEG_TO_RAD = Math.PI / 180; // Precalculated constant for degree to radian conversion
-
-    // --- Object Pools ---
-    const particlePool = Array(MAX_PARTICLES).fill(null).map(() => ({})); // Initialize with empty objects
-    let nextAvailableParticleIndex = 0;
-
-    const hitTextPool = Array(MAX_FEEDBACK_TEXTS).fill(null).map(() => ({}));
-    let nextAvailableHitTextIndex = 0;
-
-    const comboTextPool = Array(MAX_FEEDBACK_TEXTS).fill(null).map(() => ({}));
-    let nextAvailableComboTextIndex = 0;
-
-    const roundCompleteTextPool = Array(MAX_FEEDBACK_TEXTS).fill(null).map(() => ({}));
-    let nextAvailableRoundCompleteTextIndex = 0;
-
-    // --- DOM Elements ---
-    const canvas = document.getElementById('gameCanvas'); // Main game canvas
-    let ctx = null; // To be initialized based on renderer
-    let gl = null; // To be initialized later
-    
-    const elements = {
-      score: document.getElementById('score'),
-      bpm: document.getElementById('bpm'),
-      accuracy: document.getElementById('accuracy'),
-      combo: document.getElementById('combo'), // New combo element
-      startMenu: document.getElementById('startMenu'),
-      playButton: document.getElementById('playButton'),
-      settingsButton: document.getElementById('settingsButton'),
-      aboutButton: document.getElementById('aboutButton'),
-      settingsMenu: document.getElementById('settingsMenu'),
-      backToMainMenuButton: document.getElementById('backToMainMenuButton'),
-      renderer2d: document.getElementById('renderer2d'),
-      rendererWebGL: document.getElementById('rendererWebGL'),
-      graphicsLow: document.getElementById('graphicsLow'),
-      graphicsMedium: document.getElementById('graphicsMedium'),
-      graphicsHigh: document.getElementById('graphicsHigh'),
-      difficultyEasy: document.getElementById('difficultyEasy'),
-      difficultyNormal: document.getElementById('difficultyNormal'),
-      difficultyHard: document.getElementById('difficultyHard'),
-      shaderOff: document.getElementById('shaderOff'), // New shader button
-      shaderInvert: document.getElementById('shaderInvert'), // New shader button for inversion
-      shaderChromaticGlow: document.getElementById('shaderChromaticGlow'), // New shader button for chromatic + glow
-      customAlertModal: document.getElementById('customAlertModal'),
-      customAlertTitle: document.getElementById('customAlertTitle'),
-      customAlertMessage: document.getElementById('customAlertMessage'),
-      customAlertCloseButton: document.getElementById('customAlertCloseButton'),
-      pauseMenu: document.getElementById('pauseMenu'), // New pause menu element
-      continueButton: document.getElementById('continueButton'), // New continue button
-      restartButton: document.getElementById('restartButton'), // New restart button
-      exitToMenuButton: document.getElementById('exitToMenuButton'), // New exit button
-      colorModePerRound: document.getElementById('colorModePerRound'), // New color mode button
-      colorModeRainbow: document.getElementById('colorModeRainbow'),   // New color mode button
-      colorModeMonochromatic: document.getElementById('colorModeMonochromatic'), // New monochromatic button
-      gameInfoText: document.getElementById('gameInfoText'), // Reference to the info text
-      scoreScreen: document.getElementById('scoreScreen'), // New score screen element
-      finalScore: document.getElementById('finalScore'), // Final score display
-      finalAccuracy: document.getElementById('finalAccuracy'), // Final accuracy display
-      finalRank: document.getElementById('finalRank'), // Final rank display
-      playAgainButton: document.getElementById('playAgainButton'), // Play again button
-      introAnimationText: document.getElementById('introAnimationText'), // Intro animation text
-      orientationWarning: document.getElementById('orientationWarning'), // Orientation warning
-      imageSmoothingSmooth: document.getElementById('imageSmoothingSmooth'), // New 2D AA button
-      imageSmoothingPixelated: document.getElementById('imageSmoothingPixelated'), // New 2D AA button
-      antiAliasingNone: document.getElementById('antiAliasingNone'), // New WebGL AA button
-      antiAliasingMSAAx2: document.getElementById('antiAliasingMSAAx2'), // New WebGL AA button
-      antiAliasingFXAA: document.getElementById('antiAliasingFXAA'), // New WebGL AA button
-    };
-
-    // --- Game State ---
-    let gameState = {
-      phase: 'menu', // 'menu', 'introAnimation', 'playing', 'ended', 'settings', 'roundComplete', 'paused', 'scoreScreen'
-      score: 0,
-      lastTime: 0,
-      currentRoundIndex: 0,
-      totalHits: 0,
-      totalAttempts: 0,
-      activeMarkers: [],
-      particles: [], // Active particles
-      hitFeedbackTexts: [], // Active hit feedback texts
-      comboFeedbackTexts: [], // Active combo texts
-      roundCompleteTexts: [], // Active round complete texts
-      player: {
-        angle: 0,
-        radius: 0,
-        trail: []
-      },
-      startTime: 0,
-      globalTime: 0,
-      currentRenderer: '2d', // '2d' or 'webgl'
-      currentDifficulty: 'normal', // Default difficulty
-      currentGraphicsQuality: 'medium', // Default graphics quality
-      activeShader: 'none', // 'none', 'invert', 'chromatic_glow'
-      combo: 0, // Current combo count
-      centralReelPulseScale: 1, // For central reel animation
-      nextRoundStartTime: 0, // Time when next round should start
-      colorMode: 'rainbow', // Default color mode
-      introAnimationStartTime: 0, // For intro animation
-      finalScoreValue: 0, // Store final score for score screen
-      finalAccuracyValue: 0, // Store final accuracy for score screen
-      imageSmoothingEnabled: true, // Default for 2D anti-aliasing
-      currentAntiAliasing: 'none', // 'none', 'msaa_x2', 'fxaa' for WebGL
-      lastColorChangeAngle: 0, // New: Tracks the angle at which the color last changed for rainbow mode
-      rotationsCompletedThisRound: 0, // New: Tracks full 360-degree rotations in current round
-      lastCheckedRotationAngle: 0, // New: To track angle for rotation completion
-    };
-
-    let animationFrameId; // Global variable to store the animation frame ID
-
-    // --- WebGL Data ---
-    let webglData = {
-        program: null,
-        positionAttributeLocation: null,
-        resolutionUniformLocation: null,
-        colorUniformLocation: null,
-        positionBuffer: null,
-
-        // MSAA related
-        msaaFramebuffer: null,
-        msaaRenderbuffer: null,
-        msaaTexture: null,
-
-        // FXAA related
-        fxaaProgram: null,
-        fxaaPositionLocation: null,
-        fxaaTexCoordLocation: null,
-        fxaaResolutionUniform: null,
-        fxaaSamplerUniform: null,
-        quadBuffer: null,
-        sceneTextureFramebuffer: null,
-        sceneTexture: null,
-    };
-
-    // Main game circle object (for size and position reference)
-    const mainCircle = { x: 0, y: 0, radius: 0 };
-
-    // Arrays to store background elements properties
-    let backgroundSquares = [];
-    let backgroundLines = []; // New array for background lines
-
-    // Game rounds with different BPM and note patterns
+    // Rounds del juego
     const rounds = [
       { bpm: 60, notes: [90, 270], beatsPerRotation: 2 },
       { bpm: 90, notes: [0, 120, 240], beatsPerRotation: 3 },
@@ -699,265 +277,410 @@
       { bpm: 150, notes: [0, 72, 144, 216, 288], beatsPerRotation: 5 }
     ];
 
-    // Off-screen canvas for shader effects
-    let tempCanvas = null;
-    let tempCtx = null;
+    // --- Variables Globales de Babylon.js ---
+    let engine, scene, camera, canvasElem;
+    let mainCircleMesh, playerMesh, markerMeshes = [];
+    let particleSystems = [];
+    let currentRoundIndex = 0;
+    let currentColorIndex = 0;
+    
+    // --- Estado del Juego ---
+    let gameState = {
+      phase: 'menu', // 'menu', 'introAnimation', 'playing', 'ended', 'settings', 'paused', 'scoreScreen'
+      score: 0,
+      totalHits: 0,
+      totalAttempts: 0,
+      combo: 0,
+      activeMarkers: [],
+      currentDifficulty: 'normal',
+      currentGraphicsQuality: 'medium',
+      activeShader: 'none',
+      colorMode: 'rainbow',
+      playerAngle: 0,
+      centralReelPulseScale: 1,
+      rotationsCompletedThisRound: 0,
+      lastCheckedRotationAngle: 0,
+      globalTime: 0
+    };
 
-    // Variable to track if spacebar is currently pressed to prevent multiple hits on keydown auto-repeat
-    let isSpacePressed = false;
+    // --- Elementos DOM ---
+    const elements = {
+      score: document.getElementById('score'),
+      bpm: document.getElementById('bpm'),
+      accuracy: document.getElementById('accuracy'),
+      combo: document.getElementById('combo'),
+      startMenu: document.getElementById('startMenu'),
+      playButton: document.getElementById('playButton'),
+      settingsButton: document.getElementById('settingsButton'),
+      aboutButton: document.getElementById('aboutButton'),
+      settingsMenu: document.getElementById('settingsMenu'),
+      backToMainMenuButton: document.getElementById('backToMainMenuButton'),
+      pauseMenu: document.getElementById('pauseMenu'),
+      continueButton: document.getElementById('continueButton'),
+      restartButton: document.getElementById('restartButton'),
+      exitToMenuButton: document.getElementById('exitToMenuButton'),
+      scoreScreen: document.getElementById('scoreScreen'),
+      finalScore: document.getElementById('finalScore'),
+      finalAccuracy: document.getElementById('finalAccuracy'),
+      finalRank: document.getElementById('finalRank'),
+      playAgainButton: document.getElementById('playAgainButton'),
+      introAnimationText: document.getElementById('introAnimationText'),
+      customAlertModal: document.getElementById('customAlertModal'),
+      customAlertTitle: document.getElementById('customAlertTitle'),
+      customAlertMessage: document.getElementById('customAlertMessage'),
+      customAlertCloseButton: document.getElementById('customAlertCloseButton'),
+      orientationWarning: document.getElementById('orientationWarning'),
+      // Botones de configuración
+      rendererStandard: document.getElementById('rendererStandard'),
+      rendererEnhanced: document.getElementById('rendererEnhanced'),
+      graphicsLow: document.getElementById('graphicsLow'),
+      graphicsMedium: document.getElementById('graphicsMedium'),
+      graphicsHigh: document.getElementById('graphicsHigh'),
+      difficultyEasy: document.getElementById('difficultyEasy'),
+      difficultyNormal: document.getElementById('difficultyNormal'),
+      difficultyHard: document.getElementById('difficultyHard'),
+      shaderOff: document.getElementById('shaderOff'),
+      shaderBloom: document.getElementById('shaderBloom'),
+      shaderGlow: document.getElementById('shaderGlow'),
+      colorModePerRound: document.getElementById('colorModePerRound'),
+      colorModeRainbow: document.getElementById('colorModeRainbow'),
+      colorModeMonochromatic: document.getElementById('colorModeMonochromatic')
+    };
 
-    // Debounce variable for gameplay input (keyboard and touch)
-    let lastGameplayInputTime = 0;
-    const GAMEPLAY_INPUT_COOLDOWN = 20; // 20ms cooldown to prevent multiple rapid taps
-
-    // --- Utility Functions ---
-    /**
-     * Muestra un modal de alerta personalizado con un título y un mensaje.
-     * @param {string} title - El título de la alerta.
-     * @param {string} message - El contenido del mensaje de la alerta.
-     */
+    // --- Funciones de Utilidad ---
     function customAlert(title, message) {
-        elements.customAlertTitle.textContent = title;
-        elements.customAlertMessage.textContent = message;
-        elements.customAlertModal.style.display = 'flex';
+      elements.customAlertTitle.textContent = title;
+      elements.customAlertMessage.textContent = message;
+      elements.customAlertModal.classList.remove('hidden');
     }
 
-    /** Oculta el modal de alerta personalizado. */
     function hideCustomAlert() {
-        elements.customAlertModal.style.display = 'none';
+      elements.customAlertModal.classList.add('hidden');
     }
 
-    /**
-     * Convierte una cadena de color hexadecimal en un array de valores RGB normalizados [r, g, b].
-     * @param {string} hex - La cadena de color hexadecimal (ej. "#RRGGBB").
-     * @returns {Array<number>} Un array que contiene los valores RGB de 0 a 1.
-     */
-    function hexToRgbNormalized(hex) {
-        const r = parseInt(hex.slice(1, 3), 16) / 255;
-        const g = parseInt(hex.slice(3, 5), 16) / 255;
-        const b = parseInt(hex.slice(5, 7), 16) / 255;
-        return [r, g, b];
-    }
-
-    /**
-     * Convierte una cadena de color hexadecimal en una cadena RGB (ej. "255,0,255").
-     * @param {string} hex - La cadena de color hexadecimal (ej. "#RRGGBB").
-     * @returns {string} La cadena RGB.
-     */
     function hexToRgb(hex) {
       const r = parseInt(hex.slice(1, 3), 16);
       const g = parseInt(hex.slice(3, 5), 16);
       const b = parseInt(hex.slice(5, 7), 16);
-      return `${r},${g},${b}`;
+      return { r, g, b };
     }
 
-    /**
-     * Recupera el valor de una variable CSS y lo convierte en una cadena RGB para dibujar en el canvas.
-     * @param {string} cssVar - El nombre de la variable CSS (ej. '--main-border-color').
-     * @returns {string} La cadena RGB (ej. "174,202,210").
-     */
-    function var_to_rgb(cssVar) {
-        const computedStyle = getComputedStyle(document.body);
-        const color = computedStyle.getPropertyValue(cssVar).trim();
-        if (color.startsWith('#')) {
-            return hexToRgb(color);
-        }
-        // Si ya está en formato rgb() o rgba(), extrae solo los valores RGB
-        if (color.startsWith('rgb(') || color.startsWith('rgba(')) {
-            return color.match(/\d+/g).slice(0,3).join(',');
-        }
-        return '255,255,255'; // Por defecto, blanco si no se reconoce
+    function getAccuracyRank(accuracyPercentage) {
+      if (accuracyPercentage === 100) return 'SX';
+      if (accuracyPercentage >= 95) return 'S';
+      if (accuracyPercentage >= 90) return 'A';
+      if (accuracyPercentage >= 80) return 'B';
+      if (accuracyPercentage >= 70) return 'C';
+      return 'E';
     }
 
-    /** Actualiza el índice de color actual para ciclar a través de los colores pastel. */
-    // This function is no longer called by setInterval. Color update is now tied to player rotation.
-    function updatePsychedelicColors() {
-      // This function is now a placeholder. The logic has moved to updatePlayer.
+    function updateHUD() {
+      elements.score.textContent = gameState.score;
+      const accuracy = gameState.totalAttempts === 0 ? 100 : 
+        (gameState.totalHits / gameState.totalAttempts * 100).toFixed(1);
+      elements.accuracy.textContent = `${accuracy}%`;
+      elements.combo.textContent = gameState.combo;
     }
 
-    /** Inicializa (o reinicializa) los cuadrados y líneas de fondo. */
-    function initializeBackgroundElements() {
-        backgroundSquares = [];
-        backgroundLines = [];
-
-        // Los elementos de fondo deben cubrir todo el viewport
-        const bgAreaWidth = window.innerWidth;
-        const bgAreaHeight = window.innerHeight;
-
-        // Inicializa los cuadrados de fondo
-        for (let i = 0; i < NUM_BACKGROUND_SQUARES; i++) {
-            backgroundSquares.push({
-                x: Math.random() * bgAreaWidth,
-                y: Math.random() * bgAreaHeight,
-                size: Math.random() * 50 + 20,
-                rotation: Math.random() * Math.PI * 2,
-                rotationSpeed: (Math.random() - 0.5) * 0.00005, // Rotación más lenta
-                moveSpeedX: (Math.random() - 0.5) * 0.005, // Movimiento más lento para paralaje
-                moveSpeedY: (Math.random() - 0.5) * 0.005,
-                color: PASTEL_COLORS[Math.floor(Math.random() * PASTEL_COLORS.length)],
-                alpha: Math.random() * 0.1 + 0.03 // Opacidad muy baja para el fondo
-            });
-        }
-
-        // Inicializa las líneas de fondo
-        for (let i = 0; i < NUM_BACKGROUND_LINES; i++) {
-            backgroundLines.push({
-                x: Math.random() * bgAreaWidth,
-                y: Math.random() * bgAreaHeight,
-                length: Math.random() * 100 + 50,
-                angle: Math.random() * Math.PI * 2,
-                rotationSpeed: (Math.random() - 0.5) * 0.0001, // Rotación ligeramente más rápida que los cuadrados
-                moveSpeed: Math.random() * 0.08 + 0.03, // Movimiento más rápido que los cuadrados para más paralaje
-                color: PASTEL_COLORS[Math.floor(Math.random() * PASTEL_COLORS.length)],
-                alpha: Math.random() * 0.08 + 0.02 // Opacidad muy baja
-            });
-        }
-    }
-
-    // --- Initialization Functions ---
-    /** Ajusta el tamaño del canvas de forma responsiva e inicializa los elementos de fondo. */
-    const setCanvasSize = () => {
-      const dpr = window.devicePixelRatio || 1;
-
-      // Establece las dimensiones para el canvas principal del juego para cubrir toda la ventana
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      canvas.style.width = `${window.innerWidth}px`;
-      canvas.style.height = `${window.innerHeight}px`;
+    function calculatePrecision(angleDiff) {
+      const difficultyMultiplier = DIFFICULTY_MULTIPLIERS[gameState.currentDifficulty];
       
-      if (gameState.currentRenderer === '2d' && ctx) {
-        ctx.scale(dpr, dpr); // Escala el contexto para pantallas de alta DPI
-      } else if (gl) {
-        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-        // Actualizar matriz de proyección con nuevas dimensiones (no implementado en este ejemplo,
-        // pero es una consideración importante para transformaciones 3D o escalado de UI en WebGL)
+      for (const key in BASE_PRECISION) {
+        const precisionLevel = BASE_PRECISION[key];
+        if (precisionLevel.threshold !== Infinity && angleDiff <= precisionLevel.threshold * difficultyMultiplier) {
+          return precisionLevel;
+        }
       }
+      return BASE_PRECISION.MISS;
+    }
 
-      // Inicializa o redimensiona el canvas fuera de pantalla para los shaders
-      if (gameState.currentRenderer === '2d' && !tempCanvas) {
-        tempCanvas = document.createElement('canvas');
-        tempCtx = tempCanvas.getContext('2d');
-      }
-      if (tempCanvas) {
-        tempCanvas.width = canvas.width;
-        tempCanvas.height = canvas.height;
-      }
-
-      // mainCircle.x y mainCircle.y están centrados en relación con el canvas completo
-      mainCircle.x = window.innerWidth / 2;
-      mainCircle.y = window.innerHeight / 2;
+    // --- Funciones de Babylon.js ---
+    function initBabylon() {
+      // Obtener el canvas
+      canvasElem = document.getElementById('renderCanvas');
       
-      // mainCircle.radius escala con la dimensión mínima de la ventana
-      const gameAreaSize = Math.min(window.innerWidth, window.innerHeight) * 0.9;
-      mainCircle.radius = gameAreaSize * 0.45; // Órbita más grande
-      gameState.player.radius = mainCircle.radius * 0.08; // Tamaño del jugador en relación con la órbita
+      // Crear el motor de Babylon.js
+      engine = new BABYLON.Engine(canvasElem, true, {
+        preserveDrawingBuffer: true,
+        stencil: true
+      });
+      
+      // Crear la escena
+      scene = new BABYLON.Scene(engine);
+      
+      // Crear una cámara
+      camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2, 10, BABYLON.Vector3.Zero(), scene);
+      camera.attachControl(canvasElem, true);
+      camera.inputs.attached.keyboard.detachControl(); // Deshabilitar controles de teclado de la cámara
+      
+      // Crear luz
+      const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+      light.intensity = 0.7;
+      
+      // Configurar el entorno
+      setupGameScene();
+      
+      // Iniciar el bucle de renderizado
+      engine.runRenderLoop(() => {
+        scene.render();
+        updateGame();
+      });
+      
+      // Manejar redimensionamiento de ventana
+      window.addEventListener('resize', () => {
+        engine.resize();
+      });
+    }
 
-      initializeBackgroundElements(); // Reinicializa los elementos de fondo para el canvas completo
-    };
-    
-    // --- Game Logic Functions ---
+    function setupGameScene() {
+      // Limpiar escena si ya existe
+      if (mainCircleMesh) mainCircleMesh.dispose();
+      if (playerMesh) playerMesh.dispose();
+      markerMeshes.forEach(mesh => mesh.dispose());
+      markerMeshes = [];
+      particleSystems.forEach(system => system.dispose());
+      particleSystems = [];
+      
+      // Crear el círculo principal (anillo)
+      mainCircleMesh = BABYLON.MeshBuilder.CreateTorus("mainCircle", {
+        diameter: 5,
+        thickness: 0.2,
+        tessellation: 60
+      }, scene);
+      mainCircleMesh.rotation.x = Math.PI / 2;
+      
+      // Crear el jugador (esfera)
+      playerMesh = BABYLON.MeshBuilder.CreateSphere("player", {
+        diameter: 0.3
+      }, scene);
+      
+      // Material para el círculo principal
+      const mainCircleMaterial = new BABYLON.StandardMaterial("mainCircleMaterial", scene);
+      mainCircleMaterial.diffuseColor = new BABYLON.Color3(1, 1, 1);
+      mainCircleMaterial.emissiveColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+      mainCircleMesh.material = mainCircleMaterial;
+      
+      // Material para el jugador
+      const playerMaterial = new BABYLON.StandardMaterial("playerMaterial", scene);
+      playerMaterial.diffuseColor = new BABYLON.Color3.FromHexString(PASTEL_COLORS[currentColorIndex]);
+      playerMaterial.emissiveColor = new BABYLON.Color3.FromHexString(PASTEL_COLORS[currentColorIndex]);
+      playerMesh.material = playerMaterial;
+      
+      // Crear marcadores iniciales
+      createMarkers();
+      
+      // Configurar efectos post-procesamiento según la configuración
+      setupPostProcessing();
+    }
+
+    function createMarkers() {
+      // Limpiar marcadores existentes
+      markerMeshes.forEach(mesh => mesh.dispose());
+      markerMeshes = [];
+      
+      const round = rounds[currentRoundIndex];
+      if (!round) return;
+      
+      // Crear marcadores para esta ronda
+      round.notes.forEach((angle, index) => {
+        const marker = BABYLON.MeshBuilder.CreateSphere(`marker-${index}`, {
+          diameter: 0.4
+        }, scene);
+        
+        const markerMaterial = new BABYLON.StandardMaterial(`markerMaterial-${index}`, scene);
+        markerMaterial.diffuseColor = new BABYLON.Color3.FromHexString(PASTEL_COLORS[(currentColorIndex + 2) % PASTEL_COLORS.length]);
+        markerMaterial.emissiveColor = new BABYLON.Color3.FromHexString(PASTEL_COLORS[(currentColorIndex + 2) % PASTEL_COLORS.length]);
+        marker.material = markerMaterial;
+        
+        markerMeshes.push(marker);
+        gameState.activeMarkers.push({ 
+          angle, 
+          hit: false, 
+          originalAngle: angle,
+          mesh: marker 
+        });
+      });
+      
+      // Actualizar BPM en el HUD
+      elements.bpm.textContent = round.bpm;
+    }
+
+    function updateMarkers() {
+      const radius = 2.5;
+      
+      gameState.activeMarkers.forEach((marker, index) => {
+        if (marker.hit) {
+          // Si el marcador fue golpeado, hacerlo más transparente
+          marker.mesh.material.alpha = 0.3;
+          return;
+        }
+        
+        // Calcular posición del marcador
+        const radian = marker.angle * Math.PI / 180;
+        const x = Math.cos(radian) * radius;
+        const z = Math.sin(radian) * radius;
+        
+        marker.mesh.position.set(x, 0, z);
+      });
+    }
+
+    function updatePlayer() {
+      const round = rounds[currentRoundIndex];
+      if (!round) return;
+      
+      // Actualizar ángulo del jugador basado en BPM
+      const degreesPerBeat = 180 / round.beatsPerRotation;
+      const angleIncrease = (degreesPerBeat * (round.bpm / 60)) * (engine.getDeltaTime() / 1000);
+      const previousAngle = gameState.playerAngle;
+      gameState.playerAngle += angleIncrease;
+      
+      // Actualizar posición del jugador
+      const radius = 2.5;
+      const radian = gameState.playerAngle * Math.PI / 180;
+      const x = Math.cos(radian) * radius;
+      const z = Math.sin(radian) * radius;
+      
+      playerMesh.position.set(x, 0, z);
+      
+      // Actualizar color según el modo
+      updatePlayerColor();
+      
+      // Verificar rotaciones completadas
+      const currentTotalRotations = Math.floor(gameState.playerAngle / 360);
+      const lastTotalRotations = Math.floor(previousAngle / 360);
+      
+      if (currentTotalRotations > lastTotalRotations) {
+        gameState.rotationsCompletedThisRound += (currentTotalRotations - lastTotalRotations);
+      }
+      
+      // Verificar si se completó la ronda
+      if (gameState.rotationsCompletedThisRound >= 1) {
+        completeRound();
+      }
+    }
+
+    function updatePlayerColor() {
+      if (gameState.colorMode === 'rainbow') {
+        const anglePerColor = 360 / PASTEL_COLORS.length;
+        const currentAngleNormalized = (gameState.playerAngle % 360 + 360) % 360;
+        currentColorIndex = Math.floor(currentAngleNormalized / anglePerColor) % PASTEL_COLORS.length;
+      }
+      
+      // Aplicar color al jugador
+      const playerMaterial = playerMesh.material;
+      playerMaterial.diffuseColor = new BABYLON.Color3.FromHexString(PASTEL_COLORS[currentColorIndex]);
+      playerMaterial.emissiveColor = new BABYLON.Color3.FromHexString(PASTEL_COLORS[currentColorIndex]);
+    }
+
+    function createParticles(angle, color, count = 10) {
+      if (gameState.currentGraphicsQuality === 'low') return;
+      
+      const particleSystem = new BABYLON.ParticleSystem("particles", count, scene);
+      const radius = 2.5;
+      const radian = angle * Math.PI / 180;
+      const x = Math.cos(radian) * radius;
+      const z = Math.sin(radian) * radius;
+      
+      particleSystem.particleTexture = new BABYLON.Texture("https://www.babylonjs.com/assets/Flare.png", scene);
+      particleSystem.emitter = new BABYLON.Vector3(x, 0, z);
+      particleSystem.minEmitBox = new BABYLON.Vector3(0, 0, 0);
+      particleSystem.maxEmitBox = new BABYLON.Vector3(0, 0, 0);
+      
+      const rgb = hexToRgb(color);
+      particleSystem.color1 = new BABYLON.Color4(rgb.r / 255, rgb.g / 255, rgb.b / 255, 1.0);
+      particleSystem.color2 = new BABYLON.Color4(rgb.r / 255, rgb.g / 255, rgb.b / 255, 1.0);
+      particleSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0.0);
+      
+      particleSystem.minSize = 0.1;
+      particleSystem.maxSize = 0.3;
+      
+      particleSystem.minLifeTime = 0.3;
+      particleSystem.maxLifeTime = 1.5;
+      
+      particleSystem.emitRate = count;
+      particleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ONEONE;
+      
+      particleSystem.minEmitPower = 1;
+      particleSystem.maxEmitPower = 3;
+      particleSystem.updateSpeed = 0.005;
+      
+      particleSystem.start();
+      particleSystems.push(particleSystem);
+      
+      // Detener el sistema de partículas después de un tiempo
+      setTimeout(() => {
+        particleSystem.stop();
+        const index = particleSystems.indexOf(particleSystem);
+        if (index > -1) {
+          particleSystems.splice(index, 1);
+        }
+        setTimeout(() => {
+          particleSystem.dispose();
+        }, 2000);
+      }, 100);
+    }
+
+    function setupPostProcessing() {
+      // Limpiar efectos anteriores
+      scene.postProcessRenderPipelineManager.detachCamerasFromRenderPipeline("Standard", camera);
+      
+      if (gameState.activeShader === 'bloom') {
+        // Pipeline de Bloom
+        const pipeline = new BABYLON.DefaultRenderingPipeline("Standard", true, scene, [camera]);
+        pipeline.bloomEnabled = true;
+        pipeline.bloomThreshold = 0.8;
+        pipeline.bloomWeight = 0.5;
+        pipeline.bloomKernel = 64;
+        pipeline.bloomScale = 0.5;
+      } else if (gameState.activeShader === 'glow') {
+        // Pipeline de Glow (usando LDR glow)
+        const pipeline = new BABYLON.DefaultRenderingPipeline("Standard", true, scene, [camera]);
+        pipeline.glowLayerEnabled = true;
+        pipeline.glowLayerIntensity = 1.0;
+      }
+    }
+
+    // --- Lógica del Juego ---
     function startRound(roundIndex) {
       if (roundIndex >= rounds.length) {
-          // Si todas las rondas están completas, ve a la pantalla de puntuación
-          showScoreScreen();
-          return;
+        showScoreScreen();
+        return;
       }
-
-      const round = rounds[roundIndex];
-      // Reinicia solo el estado de golpeo para los nuevos marcadores de ronda
-      gameState.activeMarkers = round.notes.map(angle => ({ angle, hit: false, originalAngle: angle }));
-      elements.bpm.textContent = round.bpm;
-      gameState.player.angle = 0;
-      gameState.player.trail = [];
-      gameState.currentRoundIndex = roundIndex;
-      gameState.lastColorChangeAngle = 0; // Reset for new round
-      gameState.rotationsCompletedThisRound = 0; // Reset rotations for new round
-      gameState.lastCheckedRotationAngle = 0; // Reset last checked angle for new round
-
-      // Si el modo de color es "Por Ronda", establece el color una vez para la ronda
+      
+      currentRoundIndex = roundIndex;
+      gameState.activeMarkers = [];
+      gameState.playerAngle = 0;
+      gameState.rotationsCompletedThisRound = 0;
+      gameState.lastCheckedRotationAngle = 0;
+      
+      // Si el modo de color es "Por Ronda", elegir un color aleatorio
       if (gameState.colorMode === 'per_round') {
-          currentColorIndex = Math.floor(Math.random() * PASTEL_COLORS.length); // Elige un color aleatorio para la ronda
-      } else if (gameState.colorMode === 'monochromatic') {
-          // Monochromatic mode: set a fixed grey/white color
-          currentColorIndex = 0; // Or any other index that maps to a grey/white if you add them to PASTEL_COLORS
-          // For now, let's just use a fixed grey for monochromatic
-          // We'll override the color selection logic in draw functions for monochromatic
+        currentColorIndex = Math.floor(Math.random() * PASTEL_COLORS.length);
       }
+      
+      createMarkers();
+      elements.bpm.textContent = rounds[roundIndex].bpm;
     }
 
-    function endGame() {
-        // Esta función ahora es principalmente para establecer la fase en 'ended'
-        // La visualización real de la puntuación/rango se maneja mediante showScoreScreen()
-        gameState.phase = 'ended'; 
-        gameState.comboFeedbackTexts = []; // Limpia cualquier texto de combo flotante
-        gameState.roundCompleteTexts = []; // Limpia cualquier texto de ronda completa
-        updateHUD(); // Asegura que el HUD refleje el estado final
-        // No hay dibujo directo en el canvas aquí, se llamará a showScoreScreen
+    function completeRound() {
+      // Crear texto de ronda completada
+      createRoundCompleteText(`RONDA ${currentRoundIndex + 1} COMPLETADA!`);
+      
+      // Avanzar a la siguiente ronda después de un retraso
+      setTimeout(() => {
+        currentRoundIndex++;
+        startRound(currentRoundIndex);
+      }, 2000);
     }
-
-    /**
-     * Calcula el rango de precisión basado en un porcentaje.
-     * @param {number} accuracyPercentage - La precisión como porcentaje (ej. 95.5).
-     * @returns {string} El rango (ej. "SX", "A").
-     */
-    function getAccuracyRank(accuracyPercentage) {
-        if (accuracyPercentage === 100) return 'SX';
-        if (accuracyPercentage >= 95) return 'S';
-        if (accuracyPercentage >= 90) return 'A';
-        if (accuracyPercentage >= 80) return 'B';
-        if (accuracyPercentage >= 70) return 'C';
-        return 'E';
-    }
-
-    /** Muestra la pantalla de puntuación final. */
-    function showScoreScreen() {
-        gameState.phase = 'scoreScreen';
-        elements.finalScore.textContent = gameState.score;
-        const accuracy = gameState.totalAttempts === 0 ? 100 : (gameState.totalHits / gameState.totalAttempts * 100);
-        gameState.finalAccuracyValue = accuracy.toFixed(1); // Almacena para mostrar
-        elements.finalAccuracy.textContent = `${gameState.finalAccuracyValue}%`;
-        elements.finalRank.textContent = getAccuracyRank(parseFloat(gameState.finalAccuracyValue));
-        elements.scoreScreen.classList.remove('hidden');
-    }
-
-    function resetGameStats() {
-        gameState.score = 0;
-        gameState.totalHits = 0;
-        gameState.totalAttempts = 0;
-        gameState.combo = 0; // Combo reiniciado aquí (al inicio de un nuevo juego)
-        // Limpia los textos de retroalimentación activos y reinicia los pools
-        gameState.comboFeedbackTexts = [];
-        gameState.roundCompleteTexts = [];
-        gameState.hitFeedbackTexts = [];
-        gameState.particles = [];
-        nextAvailableParticleIndex = 0;
-        nextAvailableHitTextIndex = 0;
-        nextAvailableComboTextIndex = 0;
-        nextAvailableRoundCompleteTextIndex = 0;
-        gameState.rotationsCompletedThisRound = 0; // Reset rotations
-        gameState.lastCheckedRotationAngle = 0; // Reset last checked angle
-        updateHUD();
-    }
-
-    /** Reinicia el juego, pasando por la animación de introducción. */
-    function restartGame() {
-        elements.pauseMenu.classList.add('hidden');
-        elements.scoreScreen.classList.add('hidden');
-        elements.introAnimationText.classList.remove('hidden');
-        elements.introAnimationText.classList.add('animate-intro'); // Inicia la animación
-        gameState.phase = 'introAnimation';
-        gameState.introAnimationStartTime = gameState.globalTime;
-        // La lógica de inicio del juego (resetGameStats, startRound) se manejará después de que la animación de introducción se complete
-    }
-
 
     function checkHit() {
-      const currentAngle = (gameState.player.angle % 360 + 360) % 360; // Calcula el ángulo actual una vez
+      const currentAngle = (gameState.playerAngle % 360 + 360) % 360;
       gameState.totalAttempts++;
+      
       let bestPrecision = BASE_PRECISION.MISS;
       let hitMarkerIndex = -1;
-
       let closestDiff = Infinity;
+      
       gameState.activeMarkers.forEach((marker, index) => {
         if (!marker.hit) {
           const angleDiff = Math.min(
@@ -965,1618 +688,419 @@
             Math.abs(currentAngle - (marker.angle + 360)),
             Math.abs(currentAngle - (marker.angle - 360))
           );
+          
           if (angleDiff < closestDiff) {
             closestDiff = angleDiff;
             hitMarkerIndex = index;
           }
         }
       });
-
+      
       if (hitMarkerIndex !== -1) {
         const marker = gameState.activeMarkers[hitMarkerIndex];
         bestPrecision = calculatePrecision(closestDiff);
-
+        
         if (bestPrecision.score > 0) {
           gameState.score += bestPrecision.score;
           gameState.totalHits++;
           marker.hit = true;
-          createParticles(marker.originalAngle, bestPrecision.color, true);
+          
+          // Crear partículas y efecto visual
+          createParticles(marker.originalAngle, bestPrecision.color);
           createHitFeedbackText(bestPrecision.text, bestPrecision.color);
-
-          // Lógica del sistema de combo: Incrementa el combo en un golpe exitoso
+          
+          // Incrementar combo
           gameState.combo++;
-          if (gameState.combo > 1 && gameState.combo % 5 === 0) { // Muestra el texto del combo cada 5 golpes
-              createComboFeedbackText(`COMBO ${gameState.combo}!`, PASTEL_COLORS[currentColorIndex]);
+          if (gameState.combo > 1 && gameState.combo % 5 === 0) {
+            createComboFeedbackText(`COMBO ${gameState.combo}!`);
           }
-          gameState.centralReelPulseScale = 1.1; // Inicia la animación de pulso del carrete central
+          
+          // Efecto de pulso en el círculo central
+          gameState.centralReelPulseScale = 1.1;
         } else {
-            // Si es un golpe MALO o FALLO, reinicia el combo
-            gameState.combo = 0;
-            createHitFeedbackText(bestPrecision.text, BASE_PRECISION.MISS.color); // Always use MISS color for broken combo feedback
-            createComboFeedbackText('COMBO BROKEN!', '#FF7F7F'); // Texto rojo para combo roto
-        }
-      } else {
-          // Si no se golpeó ningún marcador (entrada perdida, pero ningún marcador activo estaba lo suficientemente cerca), reinicia el combo
+          // Reiniciar combo si es un golpe MALO o FALLO
           gameState.combo = 0;
-          createHitFeedbackText(BASE_PRECISION.MISS.text, BASE_PRECISION.MISS.color);
-          createComboFeedbackText('COMBO BROKEN!', '#FF7F7F'); // Texto rojo para combo roto
-      }
-
-      updateHUD();
-
-      // Round completion is now handled by rotation, not individual marker hits.
-      // const allMarkersHit = gameState.activeMarkers.every(marker => marker.hit);
-      // if (allMarkersHit) {
-      //   createRoundCompleteText(`RONDA ${gameState.currentRoundIndex + 1} COMPLETADA!`, PASTEL_COLORS[currentColorIndex]);
-      //   gameState.phase = 'roundComplete';
-      //   gameState.nextRoundStartTime = gameState.globalTime + 2000; // 2 segundos de retraso
-      // }
-    }
-
-    /**
-     * Calcula la precisión en función de la diferencia de ángulo y la configuración de dificultad actual.
-     * @param {number} angleDiff - La diferencia absoluta en el ángulo entre el jugador y el marcador.
-     * @returns {object} El nivel de precisión (NANO, PERFECTO, etc.).
-     */
-    function calculatePrecision(angleDiff) {
-        const difficultyMultiplier = DIFFICULTY_MULTIPLIERS[gameState.currentDifficulty];
-        
-        for (const key in BASE_PRECISION) {
-            const precisionLevel = BASE_PRECISION[key];
-            // Aplica el multiplicador solo a los umbrales que no son Infinito (es decir, no FALLO)
-            if (precisionLevel.threshold !== Infinity && angleDiff <= precisionLevel.threshold * difficultyMultiplier) {
-                return precisionLevel;
-            }
+          createHitFeedbackText(bestPrecision.text, BASE_PRECISION.MISS.color);
+          createComboFeedbackText('COMBO BROKEN!');
         }
-        return BASE_PRECISION.MISS;
-    }
-
-    /**
-     * Obtiene el color actual para el renderizado, basado en el modo de color.
-     * @param {string} defaultColor - El color pastel predeterminado si no es monocromático.
-     * @returns {string} El color hexadecimal a usar.
-     */
-    function getCurrentRenderColor(defaultColor) {
-        if (gameState.colorMode === 'monochromatic') {
-            return '#CCCCCC'; // A light grey for monochromatic elements
-        }
-        return defaultColor;
-    }
-
-    /**
-     * Crea partículas visuales en un ángulo y color dados, reutilizando de un pool.
-     * @param {number} angle - El ángulo en el círculo donde deben aparecer las partículas.
-     * @param {string} color - El color de las partículas (cadena hexadecimal).
-     * @param {boolean} isSquare - Verdadero si las partículas deben ser cuadradas, falso para circulares.
-     */
-    function createParticles(angle, color, isSquare = false) {
-      if (gameState.currentRenderer === 'webgl') {
-          // TODO: Implementar partículas WebGL
-          return;
-      }
-      const radian = angle * DEG_TO_RAD;
-      const spawnRadius = mainCircle.radius;
-      const x = mainCircle.x + Math.cos(radian) * spawnRadius;
-      const y = mainCircle.y + Math.sin(radian) * spawnRadius;
-
-      for (let i = 0; i < PARTICLES_COUNT; i++) {
-        // Obtiene una partícula del pool
-        const particle = particlePool[nextAvailableParticleIndex];
-        nextAvailableParticleIndex = (nextAvailableParticleIndex + 1) % MAX_PARTICLES;
-
-        const speed = Math.random() * 3 + 0.5;
-        const angleOffset = (Math.random() - 0.5) * Math.PI / 2;
-        const particleAngle = radian + angleOffset;
-        
-        // Reinicia y establece las propiedades para la partícula reciclada
-        particle.x = x;
-        particle.y = y;
-        particle.vx = Math.cos(particleAngle) * speed;
-        particle.vy = Math.sin(particleAngle) * speed;
-        particle.alpha = 1;
-        particle.size = Math.random() * 4 + 2;
-        particle.color = getCurrentRenderColor(color); // Apply color mode here
-        particle.isSquare = isSquare;
-
-        gameState.particles.push(particle); // Agrega a las partículas activas
-      }
-    }
-
-    /**
-     * Crea un texto flotante de retroalimentación (ej. "¡PERFECTO!"), reutilizando de un pool.
-     * @param {string} text - El texto a mostrar.
-     * @param {string} color - El color del texto (cadena hexadecimal).
-     */
-    function createHitFeedbackText(text, color) {
-        if (gameState.currentRenderer === 'webgl') {
-            // TODO: Implementar renderizado de texto WebGL
-            return;
-        }
-        const textObj = hitTextPool[nextAvailableHitTextIndex];
-        nextAvailableHitTextIndex = (nextAvailableHitTextIndex + 1) % MAX_FEEDBACK_TEXTS;
-
-        textObj.text = text;
-        textObj.x = mainCircle.x;
-        textObj.y = mainCircle.y - mainCircle.radius * 0.5;
-        textObj.alpha = 1;
-        textObj.color = getCurrentRenderColor(color); // Apply color mode here
-        textObj.startTime = gameState.globalTime;
-        
-        gameState.hitFeedbackTexts.push(textObj);
-    }
-
-    /**
-     * Crea un texto flotante de combo (ej. "¡COMBO X!"), reutilizando de un pool.
-     * @param {string} text - El texto a mostrar.
-     * @param {string} color - El color del texto (cadena hexadecimal).
-     */
-    function createComboFeedbackText(text, color) {
-        if (gameState.currentRenderer === 'webgl') return;
-        const textObj = comboTextPool[nextAvailableComboTextIndex];
-        nextAvailableComboTextIndex = (nextAvailableComboTextIndex + 1) % MAX_FEEDBACK_TEXTS;
-
-        textObj.text = text;
-        textObj.x = mainCircle.x;
-        textObj.y = mainCircle.y + mainCircle.radius * 0.5;
-        textObj.alpha = 1;
-        textObj.color = getCurrentRenderColor(color); // Apply color mode here
-        textObj.startTime = gameState.globalTime;
-
-        gameState.comboFeedbackTexts.push(textObj);
-    }
-
-    /**
-     * Crea un texto flotante de ronda completada (ej. "¡RONDA X COMPLETADA!"), reutilizando de un pool.
-     * @param {string} text - El texto a mostrar.
-     * @param {string} color - El color del texto (cadena hexadecimal).
-     */
-    function createRoundCompleteText(text, color) {
-        if (gameState.currentRenderer === 'webgl') return;
-        const textObj = roundCompleteTextPool[nextAvailableRoundCompleteTextIndex];
-        nextAvailableRoundCompleteTextIndex = (nextAvailableRoundCompleteTextIndex + 1) % MAX_FEEDBACK_TEXTS;
-
-        textObj.text = text;
-        textObj.x = mainCircle.x;
-        textObj.y = mainCircle.y + mainCircle.radius * 0.0;
-        textObj.alpha = 1;
-        textObj.color = getCurrentRenderColor(color); // Apply color mode here
-        textObj.startTime = gameState.globalTime;
-
-        gameState.roundCompleteTexts.push(textObj);
-    }
-
-    /** Actualiza la visualización del HUD (puntuación, BPM, precisión, combo). */
-    function updateHUD() {
-      elements.score.textContent = gameState.score;
-      const accuracy = gameState.totalAttempts === 0 ? 100 : (gameState.totalHits / gameState.totalAttempts * 100).toFixed(1);
-      elements.accuracy.textContent = `${accuracy}%`;
-      elements.combo.textContent = gameState.combo;
-    }
-
-    /** Dibuja el único carrete central (centro de cassette minimalista) con un efecto de pulso. */
-    function drawCentralReel() {
-        // Change: Inner lines color from white to a variable for flexibility,
-        // but keeping it white for now as per "cambio de color al circulo exterior a blanco"
-        const innerLineColor = '#FFFFFF'; 
-
-        let reelRadius = mainCircle.radius * 0.7; 
-        
-        // Aplica el efecto de pulso para el carrete central
-        if (gameState.centralReelPulseScale > 1) {
-            reelRadius *= gameState.centralReelPulseScale;
-            // Disminuye la escala del pulso de vuelta a 1 con el tiempo
-            gameState.centralReelPulseScale -= (gameState.centralReelPulseScale - 1) * 0.3; // Decaimiento más rápido
-            if (gameState.centralReelPulseScale < 1.005) gameState.centralReelPulseScale = 1; // Ajusta a 1
-        }
-
-        ctx.save();
-        ctx.translate(mainCircle.x, mainCircle.y);
-        ctx.rotate(gameState.globalTime * 0.001); // Gira lentamente el carrete central
-
-        // Gradiente radial para un sutil efecto de brillo en el centro
-        const gradientRadius = reelRadius * 0.8;
-        const glowColor = getCurrentRenderColor(PASTEL_COLORS[currentColorIndex]);
-        const glowGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, gradientRadius);
-        glowGradient.addColorStop(0, `rgba(${hexToRgb(glowColor)}, 0.3)`); // Brillo interior
-        glowGradient.addColorStop(0.5, `rgba(${hexToRgb(glowColor)}, 0.1)`);
-        glowGradient.addColorStop(1, 'rgba(0,0,0,0)'); // Transparente exterior
-
-        ctx.fillStyle = glowGradient;
-        ctx.beginPath();
-        ctx.arc(0, 0, gradientRadius, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Círculo exterior del carrete (solo borde, sin relleno)
-        ctx.beginPath();
-        ctx.arc(0, 0, reelRadius, 0, Math.PI * 2);
-        ctx.strokeStyle = '#FFFFFF'; // Borde blanco para el carrete
-        ctx.lineWidth = 6; // Grosor del borde aumentado para el carrete (de 4 a 6)
-        ctx.stroke();
-
-        // Radios interiores (simulando dientes de carrete)
-        const numSpokes = 8;
-        for (let i = 0; i < numSpokes; i++) {
-            const spokeAngle = (Math.PI * 2 / numSpokes) * i;
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(Math.cos(spokeAngle) * reelRadius, Math.sin(spokeAngle) * reelRadius);
-            ctx.strokeStyle = innerLineColor;
-            ctx.lineWidth = 3; // Grosor de línea aumentado para los radios (de 2 a 3)
-            ctx.stroke();
-        }
-
-        ctx.restore();
-    }
-
-    /** Dibuja pequeños triángulos en el borde interior del círculo principal. */
-    function drawInnerBorderTriangles() {
-        const numTriangles = TRIANGLE_COUNT_MAIN_CIRCLE;
-        const angleStep = (Math.PI * 2) / numTriangles;
-        const triangleBase = mainCircle.radius * (TRIANGLE_SIZE_MAIN + 0.01); // Base ligeramente más grande
-        const triangleHeight = triangleBase * Math.sqrt(3) / 2;
-
-        for (let i = 0; i < numTriangles; i++) {
-            const angle = i * angleStep;
-            // El centro del triángulo es relativo al radio de órbita del jugador
-            const cx = mainCircle.x + Math.cos(angle) * (mainCircle.radius - triangleHeight / 2);
-            const cy = mainCircle.y + Math.sin(angle) * (mainCircle.radius - triangleHeight / 2);
-
-            ctx.save(); // Guarda el estado del contexto
-            ctx.translate(cx, cy); // Mueve el origen al centro del triángulo
-            ctx.rotate(angle + Math.PI / 2); // Gira para apuntar hacia el centro del círculo
-
-            ctx.beginPath();
-            ctx.moveTo(0, -triangleHeight / 2); // Parte superior del triángulo
-            ctx.lineTo(-triangleBase / 2, triangleHeight / 2); // Esquina inferior izquierda
-            ctx.lineTo(triangleBase / 2, triangleHeight / 2); // Esquina inferior derecha
-            ctx.closePath();
-
-            ctx.fillStyle = getCurrentRenderColor(PASTEL_COLORS[(i + currentColorIndex) % PASTEL_COLORS.length]); // Apply color mode here
-            ctx.fill();
-            ctx.restore(); // Restaura el estado del contexto
-        }
-    }
-
-    /** Dibuja los marcadores (bolas objetivo) para que el jugador los golpee. */
-    function drawMarkers() {
-      const centerX = mainCircle.x;
-      const centerY = mainCircle.y;
-      const radius = mainCircle.radius;
-      const markerRadius = radius * 0.05; // Tamaño del marcador activo más grande
-        
-      gameState.activeMarkers.forEach(marker => {
-        if (marker.hit) {
-            ctx.beginPath();
-            ctx.arc(
-                centerX + Math.cos(marker.originalAngle * DEG_TO_RAD) * radius, // Usa DEG_TO_RAD
-                centerY + Math.sin(marker.originalAngle * DEG_TO_RAD) * radius, // Usa DEG_TO_RAD
-                mainCircle.radius * 0.035, // Ligeramente más grande cuando se golpea para visibilidad
-                0, Math.PI * 2
-            );
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.15)'; // Blanco desvanecido para marcadores golpeados
-            ctx.fill();
-            return;
-        }
-
-        const radian = marker.angle * DEG_TO_RAD; // Usa DEG_TO_RAD
-        const x = centerX + Math.cos(radian) * radius;
-        const y = centerY + Math.sin(radian) * radius;
-
-        ctx.beginPath();
-        ctx.arc(x, y, markerRadius, 0, Math.PI * 2);
-        ctx.fillStyle = getCurrentRenderColor(PASTEL_COLORS[(currentColorIndex + 2) % PASTEL_COLORS.length]); // Apply color mode here
-        ctx.fill();
-        ctx.strokeStyle = var_to_rgb('--main-border-color'); // Color de borde consistente
-        ctx.lineWidth = 4; // Borde más grueso
-        ctx.stroke();
-      });
-    }
-
-    /** Actualiza el ángulo y el rastro del jugador. */
-    function updatePlayer(deltaTime) {
-      const round = rounds[gameState.currentRoundIndex];
-      if (!round) return;
-
-      // Lógica de BPM: Cada BPM ahora equivale a media rotación de círculo (180 grados)
-      const degreesPerBeat = 180 / round.beatsPerRotation;
-      const angleIncrease = (degreesPerBeat * (round.bpm / 60)) * (deltaTime / 1000);
-      const previousAngle = gameState.player.angle;
-      gameState.player.angle += angleIncrease;
-
-      // Update rainbow color based on player angle
-      if (gameState.colorMode === 'rainbow') {
-        // Calculate the number of full color cycles per full player rotation
-        // For example, if PASTEL_COLORS.length is 6, and we want 1 cycle per 360 degrees,
-        // then each color should last 360 / 6 = 60 degrees.
-        const anglePerColor = 360 / PASTEL_COLORS.length;
-        const currentAngleNormalized = (gameState.player.angle % 360 + 360) % 360;
-        const lastAngleNormalized = (gameState.lastColorChangeAngle % 360 + 360) % 360;
-
-        // Check if we crossed a color boundary
-        if (Math.floor(currentAngleNormalized / anglePerColor) !== Math.floor(lastAngleNormalized / anglePerColor)) {
-            currentColorIndex = Math.floor(currentAngleNormalized / anglePerColor) % PASTEL_COLORS.length;
-        }
-        gameState.lastColorChangeAngle = gameState.player.angle;
-      }
-
-      // Check for full rotations to advance round
-      const currentTotalRotations = Math.floor(gameState.player.angle / 360);
-      const lastTotalRotations = Math.floor(previousAngle / 360);
-
-      if (currentTotalRotations > lastTotalRotations) {
-          gameState.rotationsCompletedThisRound += (currentTotalRotations - lastTotalRotations);
-      }
-      
-      gameState.player.trail.push({
-        angle: gameState.player.angle,
-        alpha: 1,
-        color: getCurrentRenderColor(PASTEL_COLORS[(currentColorIndex + 3) % PASTEL_COLORS.length]) // Apply color mode here
-      });
-
-      if (gameState.player.trail.length > TRAIL_LENGTH) {
-        gameState.player.trail.shift();
-      }
-    }
-
-    /** Dibuja el rastro del jugador. */
-    function drawTrail() {
-      for (let i = 0; i < gameState.player.trail.length; i++) {
-        const pos = gameState.player.trail[i];
-        const alpha = (i / TRAIL_LENGTH) * 0.7;
-        const radian = pos.angle * DEG_TO_RAD; // Usa DEG_TO_RAD
-        const x = mainCircle.x + Math.cos(radian) * mainCircle.radius;
-        const y = mainCircle.y + Math.sin(radian) * mainCircle.radius;
-        const size = gameState.player.radius * (0.1 + (i / TRAIL_LENGTH * 0.8));
-
-        ctx.beginPath();
-        ctx.arc(x, y, size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${hexToRgb(pos.color)},${alpha})`;
-        ctx.fill();
-      }
-    }
-
-    /** Dibuja el círculo del jugador. */
-    function drawPlayer() {
-      const radian = gameState.player.angle * DEG_TO_RAD; // Usa DEG_TO_RAD
-      const x = mainCircle.x + Math.cos(radian) * mainCircle.radius;
-      const y = mainCircle.y + Math.sin(radian) * mainCircle.radius;
-
-      ctx.beginPath();
-      ctx.arc(x, y, gameState.player.radius, 0, Math.PI * 2);
-      ctx.fillStyle = getCurrentRenderColor(PASTEL_COLORS[currentColorIndex]); // Apply color mode here
-      ctx.fill();
-      ctx.strokeStyle = var_to_rgb('--main-border-color'); // Color de borde consistente
-      ctx.lineWidth = 4; // Borde más grueso
-      ctx.stroke();
-    }
-
-    /** Dibuja y actualiza las partículas. */
-    function drawParticles() {
-      gameState.particles = gameState.particles.filter(particle => {
-        particle.x += particle.vx;
-        particle.y += particle.vy;
-        particle.alpha -= 0.03;
-        particle.size *= 0.98;
-
-        ctx.fillStyle = `rgba(${hexToRgb(particle.color)},${particle.alpha})`;
-        if (particle.isSquare) {
-            ctx.fillRect(particle.x - particle.size / 2, particle.y - particle.size / 2, particle.size, particle.size);
-        } else {
-            ctx.beginPath();
-            ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        return particle.alpha > 0 && particle.size > 0.5;
-      });
-    }
-
-    /** Dibuja y actualiza los textos de retroalimentación de golpe. */
-    // NOTA: Las tres funciones de dibujo de texto de retroalimentación son muy similares.
-    // Se mantienen separadas para mayor claridad, ya que su lógica de animación (tamaño de fuente, movimiento) difiere ligeramente.
-    // Se podría hacer una única función genérica, pero agregaría complejidad.
-    function drawHitFeedbackTexts(deltaTime) {
-      gameState.hitFeedbackTexts = gameState.hitFeedbackTexts.filter(textObj => {
-        const elapsed = gameState.globalTime - textObj.startTime;
-        textObj.alpha = 1 - (elapsed / HIT_TEXT_LIFETIME);
-        textObj.y -= deltaTime * 0.05;
-
-        if (textObj.alpha > 0) {
-          ctx.fillStyle = `rgba(${hexToRgb(textObj.color)}, ${textObj.alpha})`;
-          ctx.font = `bold ${25 * textObj.alpha + 10}px Inter`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(textObj.text, textObj.x, textObj.y);
-          return true;
-        }
-        return false;
-      });
-    }
-
-    /** Dibuja y actualiza los textos de retroalimentación de combo. */
-    function drawComboFeedbackTexts(deltaTime) {
-        gameState.comboFeedbackTexts = gameState.comboFeedbackTexts.filter(textObj => {
-            const elapsed = gameState.globalTime - textObj.startTime;
-            textObj.alpha = 1 - (elapsed / COMBO_TEXT_LIFETIME);
-            textObj.y -= deltaTime * 0.04; // Flotación ligeramente más lenta
-
-            if (textObj.alpha > 0) {
-                ctx.fillStyle = `rgba(${hexToRgb(textObj.color)}, ${textObj.alpha})`;
-                ctx.font = `bold ${30 * textObj.alpha + 15}px Inter`; // Fuente más grande y desvanecida
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(textObj.text, textObj.x, textObj.y);
-                return true;
-            }
-            return false;
-        });
-    }
-
-    /** Dibuja y actualiza los textos de ronda completada. */
-    function drawRoundCompleteTexts(deltaTime) {
-        gameState.roundCompleteTexts = gameState.roundCompleteTexts.filter(textObj => {
-            const elapsed = gameState.globalTime - textObj.startTime;
-            textObj.alpha = 1 - (elapsed / ROUND_COMPLETE_TEXT_LIFETIME);
-            // Mantiene el texto centrado, no lo mueve verticalmente
-            if (textObj.alpha > 0) {
-                ctx.fillStyle = `rgba(${hexToRgb(textObj.color)}, ${textObj.alpha})`;
-                ctx.font = `bold ${40 * textObj.alpha + 20}px Inter`; // Fuente grande y desvanecida
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(textObj.text, textObj.x, textObj.y);
-                return true;
-            }
-            return false;
-        });
-    }
-
-    /**
-     * Dibuja y actualiza los cuadrados y líneas de fondo en el canvas principal.
-     * @param {number} deltaTime - Tiempo transcurrido desde el último fotograma.
-     */
-    function drawBackgroundElements(deltaTime) {
-        ctx.save();
-        
-        // Obtiene las dimensiones actuales del canvas para envolver los elementos
-        const currentCanvasWidth = window.innerWidth;
-        const currentCanvasHeight = window.innerHeight;
-
-        // Dibuja y actualiza los cuadrados
-        backgroundSquares.forEach(square => {
-            square.x += square.moveSpeedX * deltaTime;
-            square.y += square.moveSpeedY * deltaTime;
-            square.rotation += square.rotationSpeed * deltaTime;
-
-            // Envuelve los cuadrados si se salen de los límites del canvas
-            if (square.x > currentCanvasWidth + square.size) square.x = -square.size;
-            if (square.x < -square.size) square.x = currentCanvasWidth + square.size;
-            if (square.y > currentCanvasHeight + square.size) square.y = -square.size;
-            if (square.y < -square.size) square.y = currentCanvasHeight + square.size;
-
-            ctx.save();
-            ctx.translate(square.x, square.y);
-            ctx.rotate(square.rotation);
-            ctx.fillStyle = `rgba(${hexToRgb(getCurrentRenderColor(square.color))}, ${square.alpha})`; // Apply color mode here
-            ctx.fillRect(-square.size / 2, -square.size / 2, square.size, square.size);
-            ctx.restore();
-        });
-
-        // Dibuja y actualiza las líneas
-        backgroundLines.forEach(line => {
-            // Las líneas se mueven en función de su ángulo y velocidad para una dirección consistente
-            line.x += Math.cos(line.angle) * line.moveSpeed * deltaTime;
-            line.y += Math.sin(line.angle) * line.moveSpeed * deltaTime;
-            line.angle += line.rotationSpeed * deltaTime; // Las líneas también pueden rotar lentamente
-
-            // Envuelve las líneas
-            if (line.x > currentCanvasWidth + line.length) line.x = -line.length;
-            if (line.x < -line.length) line.x = currentCanvasWidth + line.length;
-            if (line.y > currentCanvasHeight + line.length) line.y = -line.length;
-            if (line.y < -line.size) line.y = currentCanvasHeight + line.length;
-
-            ctx.save();
-            ctx.translate(line.x, line.y);
-            ctx.rotate(line.angle);
-            ctx.strokeStyle = `rgba(${hexToRgb(getCurrentRenderColor(line.color))}, ${line.alpha})`; // Apply color mode here
-            ctx.lineWidth = 2; // Ancho de línea fijo
-            ctx.beginPath();
-            ctx.moveTo(-line.length / 2, 0);
-            ctx.lineTo(line.length / 2, 0);
-            ctx.stroke();
-            ctx.restore();
-        });
-
-        ctx.restore();
-    }
-
-    /** Aplica el efecto de shader de Aberración Cromática y Brillo de Movimiento. */
-    function applyChromaticGlowShader() {
-        // Verifica si el shader está activo antes de realizar cualquier cálculo
-        if (gameState.activeShader !== 'chromatic_glow') return;
-        
-        // Asegura que tempCanvas y tempCtx estén inicializados y dimensionados correctamente
-        if (!tempCanvas || tempCanvas.width !== canvas.width || tempCanvas.height !== canvas.height) {
-            setCanvasSize(); // Reinicializa si es necesario
-        }
-
-        // Agrega una verificación aquí para las dimensiones del canvas principal antes de dibujar
-        if (canvas.width === 0 || canvas.height === 0) {
-            console.error("Las dimensiones del canvas son cero, no se puede aplicar el shader.");
-            return; // Evita dibujar si el canvas no es válido
-        }
-
-        tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
-        tempCtx.drawImage(canvas, 0, 0); // Dibuja el contenido actual del canvas principal en el canvas temporal
-
-        // Limpia el canvas principal para redibujar con el efecto
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        ctx.save(); // Guarda el estado del contexto
-        ctx.globalCompositeOperation = 'lighter'; 
-        
-        const glowBlur = 0.5; // Desenfoque reducido para un brillo de movimiento mínimo
-
-        // Anima el desplazamiento para la aberración cromática basado en el ángulo del jugador
-        // Multiplicado por 2.0 para que oscile dos veces por rotación del jugador
-        const animatedOffset = Math.sin(gameState.player.angle * DEG_TO_RAD * 2.0) * 2; 
-
-        // Dibuja capas con efectos
-        const layers = [
-            // Capa Roja: se mueve en la dirección positiva del offset
-            { offsetX: animatedOffset, offsetY: animatedOffset, filter: `blur(${glowBlur}px)`, hueRotate: 0, brightness: 1.2, saturate: 1.5 }, 
-            // Capa Verde (central): sin desplazamiento, ligeramente desenfocada
-            { offsetX: 0, offsetY: 0, filter: `blur(${glowBlur * 0.5}px)`, hueRotate: 120, brightness: 1.1, saturate: 1.2 }, 
-            // Capa Azul: se mueve en la dirección negativa del offset
-            { offsetX: -animatedOffset, offsetY: -animatedOffset, filter: `blur(${glowBlur}px)`, hueRotate: 240, brightness: 1.2, saturate: 1.5 } 
-        ];
-        
-        layers.forEach(layer => {
-            ctx.filter = `blur(${layer.filter}) hue-rotate(${layer.hueRotate}deg) brightness(${layer.brightness}) saturate(${layer.saturate})`;
-            ctx.drawImage(tempCanvas, layer.offsetX, layer.offsetY);
-        });
-        
-        ctx.restore(); // Restaura el estado del contexto para restablecer globalCompositeOperation y filter
-    }
-
-    /** Dibuja todos los elementos centrales del juego para Canvas 2D. */
-    function drawCoreGameElements2D(deltaTime) {
-        drawCentralReel();
-        drawInnerBorderTriangles();
-        drawMarkers();
-        updatePlayer(deltaTime);
-        drawTrail();
-        drawPlayer();
-        drawParticles();
-        drawHitFeedbackTexts(deltaTime);
-        drawComboFeedbackTexts(deltaTime);
-        drawRoundCompleteTexts(deltaTime);
-    }
-
-    // --- WebGL Rendering ---
-    const vertexShaderSource = `
-        attribute vec2 a_position;
-        uniform vec2 u_resolution;
-        void main() {
-            // convierte la posición de píxeles a 0.0 a 1.0
-            vec2 zeroToOne = a_position / u_resolution;
-            // convierte de 0->1 a 0->2
-            vec2 zeroToTwo = zeroToOne * 2.0;
-            // convierte de 0->2 a -1->+1 (espacio de recorte)
-            vec2 clipSpace = zeroToTwo - 1.0;
-            gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
-        }
-    `;
-
-    const fragmentShaderSource = `
-        precision mediump float;
-        uniform vec4 u_color;
-        void main() {
-            gl_FragColor = u_color;
-        }
-    `;
-
-    // FXAA Shaders
-    const fxaaVertexShaderSource = `
-        attribute vec2 a_position;
-        varying vec2 v_texCoord;
-        void main() {
-            gl_Position = vec4(a_position, 0, 1);
-            v_texCoord = (a_position * 0.5) + 0.5; // Convert clip space to texture space (0 to 1)
-        }
-    `;
-    const fxaaFragmentShaderSource = `
-        precision mediump float;
-        uniform sampler2D u_sampler;
-        uniform vec2 u_resolution;
-        varying vec2 v_texCoord;
-
-        #define FXAA_REDUCE_MIN (1.0/128.0)
-        #define FXAA_REDUCE_MUL (1.0/8.0)
-        #define FXAA_SPAN_MAX 8.0
-
-        void main() {
-            vec3 rgbNW = texture2D(u_sampler, v_texCoord + (vec2(-1.0, -1.0) / u_resolution)).xyz;
-            vec3 rgbNE = texture2D(u_sampler, v_texCoord + (vec2(1.0, -1.0) / u_resolution)).xyz;
-            vec3 rgbSW = texture2D(u_sampler, v_texCoord + (vec2(-1.0, 1.0) / u_resolution)).xyz;
-            vec3 rgbSE = texture2D(u_sampler, v_texCoord + (vec2(1.0, 1.0) / u_resolution)).xyz;
-            vec3 rgbM  = texture2D(u_sampler, v_texCoord).xyz;
-
-            vec3 luma = vec3(0.299, 0.587, 0.114);
-            float lumaNW = dot(rgbNW, luma);
-            float lumaNE = dot(rgbNE, luma);
-            float lumaSW = dot(rgbSW, luma);
-            float lumaSE = dot(rgbSE, luma);
-            float lumaM  = dot(rgbM,  luma);
-
-            float lumaMin = min(lumaM, min(min(lumaNW, lumaNE), min(lumaSW, lumaSE)));
-            float lumaMax = max(lumaM, max(max(lumaNW, lumaNE), max(lumaSW, lumaSE)));
-
-            vec2 dir;
-            dir.x = -((lumaNW + lumaNE) - (lumaSW + lumaSE));
-            dir.y =  ((lumaNW + lumaSW) - (lumaNE + lumaSE));
-
-            float dirReduce = max((lumaNW + lumaNE + lumaSW + lumaSE) * (0.25 * FXAA_REDUCE_MUL), FXAA_REDUCE_MIN);
-            float rcpDirMin = 1.0 / (min(abs(dir.x), abs(dir.y)) + dirReduce);
-            dir = min(vec2( FXAA_SPAN_MAX,  FXAA_SPAN_MAX),
-                      max(vec2(-FXAA_SPAN_MAX, -FXAA_SPAN_MAX),
-                      dir * rcpDirMin)) / u_resolution;
-
-            vec3 rgbA = 0.5 * (
-                texture2D(u_sampler, v_texCoord + dir * (1.0/3.0 - 0.5)).xyz +
-                texture2D(u_sampler, v_texCoord + dir * (2.0/3.0 - 0.5)).xyz);
-            vec3 rgbB = rgbA * 0.5 + 0.25 * (
-                texture2D(u_sampler, v_texCoord + dir * -0.5).xyz +
-                texture2D(u_sampler, v_texCoord + dir * 0.5).xyz);
-
-            float lumaB = dot(rgbB, luma);
-            if ((lumaB < lumaMin) || (lumaB > lumaMax)) {
-                gl_FragColor = vec4(rgbA, 1.0);
-            } else {
-                gl_FragColor = vec4(rgbB, 1.0);
-            }
-        }
-    `;
-
-
-    function createShader(gl, type, source) {
-        const shader = gl.createShader(type);
-        gl.shaderSource(shader, source);
-        gl.compileShader(shader);
-        const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-        if (success) {
-            return shader;
-        }
-        console.error('Error compiling shader:', gl.getShaderInfoLog(shader));
-        gl.deleteShader(shader);
-        return undefined;
-    }
-
-    function createProgram(gl, vertexShader, fragmentShader) {
-        const program = gl.createProgram();
-        gl.attachShader(program, vertexShader);
-        gl.attachShader(program, fragmentShader);
-        gl.linkProgram(program);
-        const success = gl.getProgramParameter(program, gl.LINK_STATUS);
-        if (success) {
-            return program;
-        }
-        console.error('Error linking program:', gl.getProgramInfoLog(program));
-        gl.deleteProgram(program);
-        return undefined;
-    }
-
-    function initWebGL() {
-        // Intenta obtener WebGL2, retrocede a WebGL1
-        gl = canvas.getContext('webgl2', { 
-             antialias: false,
-             preserveDrawingBuffer: true }) || canvas.getContext('webgl', { 
-             antialias: false,
-             preserveDrawingBuffer: true });
-        
-        if (!gl) {
-            console.error('WebGL no es soportado por tu navegador.');
-            customAlert('Error de Renderizado', 'Tu navegador no soporta WebGL. Volviendo a Canvas 2D.');
-            return false;
-        }
-
-        // Limpia recursos anteriores si existen
-        if (webglData.program) gl.deleteProgram(webglData.program);
-        if (webglData.positionBuffer) gl.deleteBuffer(webglData.positionBuffer);
-        if (webglData.msaaFramebuffer) gl.deleteFramebuffer(webglData.msaaFramebuffer);
-        if (webglData.msaaRenderbuffer) gl.deleteRenderbuffer(webglData.msaaRenderbuffer);
-        if (webglData.msaaTexture) gl.deleteTexture(webglData.msaaTexture);
-        if (webglData.sceneTextureFramebuffer) gl.deleteFramebuffer(webglData.sceneTextureFramebuffer);
-        if (webglData.sceneTexture) gl.deleteTexture(webglData.sceneTexture);
-        if (webglData.fxaaProgram) gl.deleteProgram(webglData.fxaaProgram);
-        if (webglData.quadBuffer) gl.deleteBuffer(webglData.quadBuffer);
-
-        // Reinicializa el objeto webglData
-        webglData = {
-            program: null,
-            positionAttributeLocation: null,
-            resolutionUniformLocation: null,
-            colorUniformLocation: null,
-            positionBuffer: null,
-            msaaFramebuffer: null,
-            msaaRenderbuffer: null,
-            msaaTexture: null,
-            fxaaProgram: null,
-            fxaaPositionLocation: null,
-            fxaaTexCoordLocation: null,
-            fxaaResolutionUniform: null,
-            fxaaSamplerUniform: null,
-            quadBuffer: null,
-            sceneTextureFramebuffer: null,
-            sceneTexture: null
-        };
-
-        // Crea shaders básicos
-        const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-        const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
-        
-        if (!vertexShader || !fragmentShader) {
-            console.error('Falló la compilación de shaders WebGL');
-            return false;
-        }
-
-        webglData.program = createProgram(gl, vertexShader, fragmentShader);
-        if (!webglData.program) {
-            console.error('Falló el enlace del programa WebGL');
-            return false;
-        }
-
-        webglData.positionAttributeLocation = gl.getAttribLocation(webglData.program, "a_position");
-        webglData.resolutionUniformLocation = gl.getUniformLocation(webglData.program, "u_resolution");
-        webglData.colorUniformLocation = gl.getUniformLocation(webglData.program, "u_color");
-
-        webglData.positionBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, webglData.positionBuffer);
-
-        // Configura MSAA solo para WebGL2
-        if (gl instanceof WebGL2RenderingContext && gameState.currentAntiAliasing === 'msaa_x2') {
-            if (!gl.getExtension('WEBGL_multisample')) {
-                console.warn('WEBGL_multisample extension not supported, falling back to no MSAA.');
-                gameState.currentAntiAliasing = 'none'; // Fallback
-                customAlert('Advertencia', 'MSAA x2 no es soportado por tu dispositivo/navegador. Usando sin Anti-Aliasing.');
-                // Re-initialize without MSAA to ensure correct FBO setup
-                gl.bindFramebuffer(gl.FRAMEBUFFER, null); // Unbind FBO
-                return initWebGL(); 
-            }
-
-            webglData.msaaFramebuffer = gl.createFramebuffer();
-            gl.bindFramebuffer(gl.FRAMEBUFFER, webglData.msaaFramebuffer);
-
-            webglData.msaaRenderbuffer = gl.createRenderbuffer();
-            gl.bindRenderbuffer(gl.RENDERBUFFER, webglData.msaaRenderbuffer);
-            gl.renderbufferStorageMultisample(gl.RENDERBUFFER, 2, gl.RGBA8, canvas.width, canvas.height);
-            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, webglData.msaaRenderbuffer);
-
-            if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
-                console.error('MSAA Framebuffer incompleto');
-                gameState.currentAntiAliasing = 'none'; // Fallback
-                customAlert('Advertencia', 'MSAA x2 no pudo ser inicializado. Usando sin Anti-Aliasing.');
-                gl.bindFramebuffer(gl.FRAMEBUFFER, null); // Unbind FBO
-                return initWebGL(); // Re-initialize without MSAA
-            }
-            gl.bindFramebuffer(gl.FRAMEBUFFER, null); // Unbind FBO
-        }
-
-        // Configura FXAA
-        if (gameState.currentAntiAliasing === 'fxaa') {
-            // Framebuffer para la escena
-            webglData.sceneTextureFramebuffer = gl.createFramebuffer();
-            gl.bindFramebuffer(gl.FRAMEBUFFER, webglData.sceneTextureFramebuffer);
-            
-            webglData.sceneTexture = gl.createTexture();
-            gl.bindTexture(gl.TEXTURE_2D, webglData.sceneTexture);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, canvas.width, canvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, webglData.sceneTexture, 0);
-
-            if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
-                console.error('Framebuffer de textura incompleto');
-                gameState.currentAntiAliasing = 'none'; // Fallback
-                customAlert('Advertencia', 'FXAA no pudo ser inicializado. Usando sin Anti-Aliasing.');
-                gl.bindFramebuffer(gl.FRAMEBUFFER, null); // Unbind FBO
-                return initWebGL(); // Re-initialize without FXAA
-            }
-
-            // Programa FXAA
-            const fxaaVertexShader = createShader(gl, gl.VERTEX_SHADER, fxaaVertexShaderSource);
-            const fxaaFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fxaaFragmentShaderSource);
-            
-            if (!fxaaVertexShader || !fxaaFragmentShader) {
-                console.error('Falló la compilación de shaders FXAA');
-                gameState.currentAntiAliasing = 'none'; // Fallback
-                customAlert('Advertencia', 'Falló la compilación de shaders FXAA. Usando sin Anti-Aliasing.');
-                gl.bindFramebuffer(gl.FRAMEBUFFER, null); // Unbind FBO
-                return initWebGL(); // Re-initialize without FXAA
-            }
-
-            webglData.fxaaProgram = createProgram(gl, fxaaVertexShader, fxaaFragmentShader);
-            if (!webglData.fxaaProgram) {
-                console.error('Falló el enlace del programa FXAA');
-                gameState.currentAntiAliasing = 'none'; // Fallback
-                customAlert('Advertencia', 'Falló el enlace del programa FXAA. Usando sin Anti-Aliasing.');
-                gl.bindFramebuffer(gl.FRAMEBUFFER, null); // Unbind FBO
-                return initWebGL(); // Re-initialize without FXAA
-            }
-
-            webglData.fxaaPositionLocation = gl.getAttribLocation(webglData.fxaaProgram, "a_position");
-            webglData.fxaaResolutionUniform = gl.getUniformLocation(webglData.fxaaProgram, "u_resolution");
-            webglData.fxaaSamplerUniform = gl.getUniformLocation(webglData.fxaaProgram, "u_sampler");
-
-            // Buffer para el quad de pantalla completa
-            webglData.quadBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, webglData.quadBuffer);
-            const positions = new Float32Array([
-                -1, -1,  1, -1,  -1,  1,
-                -1,  1,  1, -1,   1,  1
-            ]);
-            gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-        }
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        return true;
-    }
-
-    /**
-     * Dibuja un círculo en WebGL
-     * @param {number} centerX - Coordenada X del centro
-     * @param {number} centerY - Coordenada Y del centro
-     * @param {number} radius - Radio del círculo
-     * @param {string} color - Color en formato hexadecimal (#RRGGBB)
-     */
-    function drawCircleWebGL(centerX, centerY, radius, color = '#FFFFFF') {
-        const segments = 32;
-        const vertices = [centerX, centerY];
-        
-        for (let i = 0; i <= segments; i++) {
-            const angle = (i / segments) * Math.PI * 2;
-            vertices.push(centerX + Math.cos(angle) * radius);
-            vertices.push(centerY + Math.sin(angle) * radius);
-        }
-        
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-        
-        const rgb = hexToRgbNormalized(color);
-        gl.uniform4f(webglData.colorUniformLocation, rgb[0], rgb[1], rgb[2], 1);
-        
-        gl.drawArrays(gl.TRIANGLE_FAN, 0, segments + 2);
-    }
-
-    /**
-     * Dibuja el carrete central en WebGL.
-     */
-    function drawCentralReelWebGL() {
-        let reelRadius = mainCircle.radius * 0.7; 
-        
-        if (gameState.centralReelPulseScale > 1) {
-            reelRadius *= gameState.centralReelPulseScale;
-            gameState.centralReelPulseScale -= (gameState.centralReelPulseScale - 1) * 0.3;
-            if (gameState.centralReelPulseScale < 1.005) gameState.centralReelPulseScale = 1;
-        }
-
-        // Outer circle (border only)
-        drawCircleWebGL(mainCircle.x, mainCircle.y, reelRadius, '#FFFFFF'); // White border
-
-        // Inner spokes (lines) - simplified for WebGL
-        const numSpokes = 8;
-        const innerLineColor = '#FFFFFF';
-        const innerLineRgb = hexToRgbNormalized(innerLineColor);
-
-        gl.uniform4f(webglData.colorUniformLocation, innerLineRgb[0], innerLineRgb[1], innerLineRgb[2], 1);
-        gl.lineWidth(3); // Set line width (may not be supported on all WebGL implementations for lines)
-
-        const lineVertices = [];
-        for (let i = 0; i < numSpokes; i++) {
-            const spokeAngle = (Math.PI * 2 / numSpokes) * i + (gameState.globalTime * 0.001); // Rotate spokes
-            lineVertices.push(mainCircle.x, mainCircle.y);
-            lineVertices.push(mainCircle.x + Math.cos(spokeAngle) * reelRadius, mainCircle.y + Math.sin(spokeAngle) * reelRadius);
-        }
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lineVertices), gl.STATIC_DRAW);
-        gl.drawArrays(gl.LINES, 0, lineVertices.length / 2);
-
-        // Simple glow effect (as a semi-transparent circle)
-        const gradientRadius = reelRadius * 0.8;
-        const glowColor = getCurrentRenderColor(PASTEL_COLORS[currentColorIndex]);
-        const glowRgb = hexToRgbNormalized(glowColor);
-        gl.uniform4f(webglData.colorUniformLocation, glowRgb[0], glowRgb[1], glowRgb[2], 0.1); // Reduced alpha for glow
-        drawCircleWebGL(mainCircle.x, mainCircle.y, gradientRadius, glowColor);
-    }
-
-    /**
-     * Dibuja los pequeños triángulos del borde interior en WebGL.
-     */
-    function drawInnerBorderTrianglesWebGL() {
-        const numTriangles = TRIANGLE_COUNT_MAIN_CIRCLE;
-        const angleStep = (Math.PI * 2) / numTriangles;
-        const triangleBase = mainCircle.radius * (TRIANGLE_SIZE_MAIN + 0.01);
-        const triangleHeight = triangleBase * Math.sqrt(3) / 2;
-
-        const triangleVertices = [];
-        for (let i = 0; i < numTriangles; i++) {
-            const angle = i * angleStep;
-            const cx = mainCircle.x + Math.cos(angle) * (mainCircle.radius - triangleHeight / 2);
-            const cy = mainCircle.y + Math.sin(angle) * (mainCircle.radius - triangleHeight / 2);
-
-            // Vertices of an equilateral triangle rotated to point towards the center
-            const p1x = cx + Math.cos(angle + Math.PI/2) * triangleHeight / 2;
-            const p1y = cy + Math.sin(angle + Math.PI/2) * triangleHeight / 2;
-
-            const p2x = cx + Math.cos(angle + Math.PI/2 + (2 * Math.PI / 3)) * triangleBase / 2;
-            const p2y = cy + Math.sin(angle + Math.PI/2 + (2 * Math.PI / 3)) * triangleBase / 2;
-
-            const p3x = cx + Math.cos(angle + Math.PI/2 + (4 * Math.PI / 3)) * triangleBase / 2;
-            const p3y = cy + Math.sin(angle + Math.PI/2 + (4 * Math.PI / 3)) * triangleBase / 2;
-            
-            triangleVertices.push(p1x, p1y, p2x, p2y, p3x, p3y);
-        }
-
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleVertices), gl.STATIC_DRAW);
-        const color = getCurrentRenderColor(PASTEL_COLORS[(currentColorIndex + 0) % PASTEL_COLORS.length]); // Use current color
-        const rgb = hexToRgbNormalized(color);
-        gl.uniform4f(webglData.colorUniformLocation, rgb[0], rgb[1], rgb[2], 1);
-        gl.drawArrays(gl.TRIANGLES, 0, triangleVertices.length / 2);
-    }
-
-    /**
-     * Dibuja el rastro del jugador en WebGL.
-     */
-    function drawTrailWebGL() {
-        const trailVertices = [];
-        for (let i = 0; i < gameState.player.trail.length; i++) {
-            const pos = gameState.player.trail[i];
-            const alpha = (i / TRAIL_LENGTH) * 0.7;
-            const radian = pos.angle * DEG_TO_RAD;
-            const x = mainCircle.x + Math.cos(radian) * mainCircle.radius;
-            const y = mainCircle.y + Math.sin(radian) * mainCircle.radius;
-            const size = gameState.player.radius * (0.1 + (i / TRAIL_LENGTH * 0.8));
-
-            // For simplicity, drawing each trail segment as a circle.
-            // For better performance, this would be batched or use instancing.
-            const segments = 16; // Fewer segments for trail circles
-            const segmentColor = hexToRgbNormalized(pos.color);
-            gl.uniform4f(webglData.colorUniformLocation, segmentColor[0], segmentColor[1], segmentColor[2], alpha);
-
-            const circleVertices = [x, y];
-            for (let j = 0; j <= segments; j++) {
-                const angle = (j / segments) * 2 * Math.PI;
-                circleVertices.push(x + Math.cos(angle) * size);
-                circleVertices.push(y + Math.sin(angle) * size);
-            }
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(circleVertices), gl.STATIC_DRAW);
-            gl.drawArrays(gl.TRIANGLE_FAN, 0, segments + 2);
-        }
-    }
-
-
-    function drawCoreGameElementsWebGL(deltaTime) {
-        // Actualiza el jugador (ángulo, posición)
-        updatePlayer(deltaTime);
-        
-        // Dibuja el borde del círculo principal
-        drawCircleWebGL(mainCircle.x, mainCircle.y, mainCircle.radius + 6, '#FFFFFF');
-        
-        // Dibuja el carrete central
-        drawCentralReelWebGL();
-
-        // Dibuja los triángulos del borde interior
-        drawInnerBorderTrianglesWebGL();
-
-        // Dibuja el rastro del jugador
-        drawTrailWebGL();
-
-        // Dibuja al jugador
-        const playerRadian = gameState.player.angle * DEG_TO_RAD;
-        const playerX = mainCircle.x + Math.cos(playerRadian) * mainCircle.radius;
-        const playerY = mainCircle.y + Math.sin(playerRadian) * mainCircle.radius;
-        const playerColor = getCurrentRenderColor(PASTEL_COLORS[currentColorIndex]);
-        drawCircleWebGL(playerX, playerY, gameState.player.radius, playerColor);
-        
-        // Dibuja los marcadores
-        const markerRadius = mainCircle.radius * 0.05;
-        gameState.activeMarkers.forEach(marker => {
-            if (marker.hit) {
-                // Draw hit marker as a faded white circle
-                drawCircleWebGL(
-                    mainCircle.x + Math.cos(marker.originalAngle * DEG_TO_RAD) * mainCircle.radius,
-                    mainCircle.y + Math.sin(marker.originalAngle * DEG_TO_RAD) * mainCircle.radius,
-                    mainCircle.radius * 0.035,
-                    '#FFFFFF'
-                );
-                return;
-            }
-            
-            const markerRadian = marker.angle * DEG_TO_RAD;
-            const markerX = mainCircle.x + Math.cos(markerRadian) * mainCircle.radius;
-            const markerY = mainCircle.y + Math.sin(markerRadian) * mainCircle.radius;
-            const markerColor = getCurrentRenderColor(PASTEL_COLORS[(currentColorIndex + 2) % PASTEL_COLORS.length]);
-            drawCircleWebGL(markerX, markerY, markerRadius, markerColor);
-        });
-
-        // TODO: Implementar partículas WebGL, textos de feedback, combo y ronda completada
-        // Esto requeriría shaders más complejos para texto y manejo de transparencia/animación.
-        // Por ahora, estas funciones solo se renderizan en Canvas 2D.
-    }
-
-    function drawWebGL(timestamp, deltaTime) {
-        if (!gl) return;
-        
-        // Determina el framebuffer objetivo
-        let targetFramebuffer = null;
-        if (gl instanceof WebGL2RenderingContext && gameState.currentAntiAliasing === 'msaa_x2') {
-            targetFramebuffer = webglData.msaaFramebuffer;
-        } else if (gameState.currentAntiAliasing === 'fxaa') {
-            targetFramebuffer = webglData.sceneTextureFramebuffer;
-        }
-        
-        // Configura el framebuffer
-        gl.bindFramebuffer(gl.FRAMEBUFFER, targetFramebuffer);
-        gl.viewport(0, 0, canvas.width, canvas.height);
-        gl.clearColor(0.05, 0.05, 0.05, 1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-        
-        // Usa el programa principal
-        gl.useProgram(webglData.program);
-        gl.enableVertexAttribArray(webglData.positionAttributeLocation);
-        gl.bindBuffer(gl.ARRAY_BUFFER, webglData.positionBuffer);
-        gl.vertexAttribPointer(webglData.positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
-        gl.uniform2f(webglData.resolutionUniformLocation, canvas.width, canvas.height);
-        
-        // Dibuja elementos del juego
-        if (gameState.phase === 'playing' || gameState.phase === 'paused' || gameState.phase === 'ended' || gameState.phase === 'roundComplete') {
-            drawCoreGameElementsWebGL(deltaTime);
-        }
-        
-        // Post-procesamiento para anti-aliasing
-        if (gl instanceof WebGL2RenderingContext && gameState.currentAntiAliasing === 'msaa_x2') {
-            // Transfiere el framebuffer multisample al framebuffer por defecto
-            gl.bindFramebuffer(gl.READ_FRAMEBUFFER, webglData.msaaFramebuffer);
-            gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
-            gl.clearBufferfv(gl.COLOR, 0, [0.05, 0.05, 0.05, 1.0]); // Clear default buffer before blit
-            gl.blitFramebuffer(
-                0, 0, canvas.width, canvas.height,
-                0, 0, canvas.width, canvas.height,
-                gl.COLOR_BUFFER_BIT, gl.LINEAR
-            );
-            gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null); // Unbind READ_FRAMEBUFFER
-        } else if (gameState.currentAntiAliasing === 'fxaa') {
-            // Renderiza con FXAA
-            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-            gl.viewport(0, 0, canvas.width, canvas.height);
-            gl.clear(gl.COLOR_BUFFER_BIT);
-            
-            gl.useProgram(webglData.fxaaProgram);
-            gl.enableVertexAttribArray(webglData.fxaaPositionLocation);
-            gl.bindBuffer(gl.ARRAY_BUFFER, webglData.quadBuffer);
-            gl.vertexAttribPointer(webglData.fxaaPositionLocation, 2, gl.FLOAT, false, 0, 0);
-            
-            gl.uniform2f(webglData.fxaaResolutionUniform, canvas.width, canvas.height);
-            gl.activeTexture(gl.TEXTURE0);
-            gl.bindTexture(gl.TEXTURE_2D, webglData.sceneTexture);
-            gl.uniform1i(webglData.fxaaSamplerUniform, 0);
-            
-            gl.drawArrays(gl.TRIANGLES, 0, 6);
-        }
-    }
-
-    // --- Render Loop ---
-    /**
-     * Bucle principal de renderizado y actualización del juego.
-     * @param {DOMHighResTimeStamp} timestamp - El tiempo actual proporcionado por requestAnimationFrame.
-     */
-    function draw(timestamp) {
-      animationFrameId = requestAnimationFrame(draw); // Store the animation frame ID
-      if (!gameState.lastTime) gameState.lastTime = timestamp;
-      const deltaTime = timestamp - gameState.lastTime;
-      gameState.lastTime = timestamp;
-      
-      // Solo actualiza el tiempo global si no está en pausa
-      if (gameState.phase !== 'paused') {
-        gameState.globalTime += deltaTime;
-      }
-
-      if (gameState.currentRenderer === 'webgl') {
-          drawWebGL(timestamp, deltaTime);
-          // For WebGL, particles and texts are not yet implemented, so they won't be drawn.
-          // The logic for round completion based on rotation is still handled in updatePlayer.
-          if (gameState.phase === 'playing') {
-            if (gameState.rotationsCompletedThisRound >= 1) { // One full rotation
-                createRoundCompleteText(`RONDA ${gameState.currentRoundIndex + 1} COMPLETADA!`, PASTEL_COLORS[currentColorIndex]);
-                gameState.currentRoundIndex++;
-                startRound(gameState.currentRoundIndex); // This will handle ending the game if all rounds are done
-            }
-          }
       } else {
-          // --- RENDERIZADO DE CANVAS 2D ---
-          if (!ctx) return;
-          ctx.clearRect(0, 0, canvas.width, canvas.height); // Siempre limpia todo el canvas para manejar correctamente los elementos de fondo animados
+        // Si no se golpeó ningún marcador, reiniciar combo
+        gameState.combo = 0;
+        createHitFeedbackText(BASE_PRECISION.MISS.text, BASE_PRECISION.MISS.color);
+        createComboFeedbackText('COMBO BROKEN!');
+      }
+      
+      updateHUD();
+      
+      // Animación del HUD
+      document.querySelectorAll('.hud-item').forEach(item => {
+        item.classList.add('animate-hud-pulse');
+        setTimeout(() => item.classList.remove('animate-hud-pulse'), 300);
+      });
+    }
 
-          // Solo dibuja los elementos visuales específicos del juego si NO está en el menú principal, configuración o pantalla de puntuación.
-          if (gameState.phase !== 'menu' && gameState.phase !== 'settings' && gameState.phase !== 'scoreScreen') {
-            // Dibuja los elementos visuales comunes del juego (fondo y borde del círculo principal)
-            drawBackgroundElements(deltaTime); // Los elementos de fondo se animan incluso cuando están en pausa
+    function createHitFeedbackText(text, color) {
+      // En una implementación completa, esto usaría BABYLON.GUI para mostrar texto en 3D
+      // Por simplicidad, usaremos un enfoque simplificado aquí
+      console.log(`Hit: ${text}`);
+    }
 
-            ctx.beginPath();
-            ctx.arc(mainCircle.x, mainCircle.y, mainCircle.radius + 6, 0, Math.PI * 2); // Parte exterior del borde
-            ctx.strokeStyle = '#FFFFFF'; // Cambiado a blanco
-            ctx.lineWidth = 12; // Coincide visualmente con el tamaño del borde CSS
-            ctx.stroke();
+    function createComboFeedbackText(text) {
+      console.log(`Combo: ${text}`);
+    }
 
-            // Renderiza los elementos del juego según la fase actual
-            if (gameState.phase === 'playing') {
-              drawCoreGameElements2D(deltaTime);
-              // Check for round completion based on full rotations
-              if (gameState.rotationsCompletedThisRound >= 1) { // One full rotation
-                  createRoundCompleteText(`RONDA ${gameState.currentRoundIndex + 1} COMPLETADA!`, PASTEL_COLORS[currentColorIndex]);
-                  gameState.currentRoundIndex++;
-                  startRound(gameState.currentRoundIndex); // This will handle ending the game if all rounds are done
-              }
-            } else if (gameState.phase === 'paused' || gameState.phase === 'ended') {
-                // Cuando está en pausa o finalizado, dibuja los elementos estáticos del juego (sin actualizaciones para la lógica central del juego,
-                // pero las animaciones transitorias como partículas/textos aún progresan).
-                drawCoreGameElements2D(deltaTime);
-            } else if (gameState.phase === 'introAnimation') {
-                const elapsed = gameState.globalTime - gameState.introAnimationStartTime;
-                const progress = Math.min(1, elapsed / INTRO_ANIMATION_DURATION);
+    function createRoundCompleteText(text) {
+      console.log(`Round Complete: ${text}`);
+    }
 
-                // Escala el círculo principal y el carrete central durante la introducción
-                const initialRadius = 0;
-                const targetRadius = mainCircle.radius;
-                const currentRadius = initialRadius + (targetRadius - initialRadius) * progress;
+    function showScoreScreen() {
+      gameState.phase = 'scoreScreen';
+      elements.finalScore.textContent = gameState.score;
+      
+      const accuracy = gameState.totalAttempts === 0 ? 100 : 
+        (gameState.totalHits / gameState.totalAttempts * 100);
+      elements.finalAccuracy.textContent = `${accuracy.toFixed(1)}%`;
+      
+      elements.finalRank.textContent = getAccuracyRank(accuracy);
+      elements.scoreScreen.classList.remove('hidden');
+    }
 
-                // Sobreescribe temporalmente mainCircle.radius para dibujar
-                const originalMainCircleRadius = mainCircle.radius;
-                mainCircle.radius = currentRadius;
+    function resetGameStats() {
+      gameState.score = 0;
+      gameState.totalHits = 0;
+      gameState.totalAttempts = 0;
+      gameState.combo = 0;
+      updateHUD();
+    }
 
-                // Dibuja el carrete central escalado y el borde del círculo principal
-                drawCentralReel();
-                ctx.beginPath();
-                ctx.arc(mainCircle.x, mainCircle.y, mainCircle.radius + 6, 0, Math.PI * 2);
-                ctx.strokeStyle = '#FFFFFF';
-                ctx.lineWidth = 12;
-                ctx.stroke();
+    function restartGame() {
+      elements.pauseMenu.classList.add('hidden');
+      elements.scoreScreen.classList.add('hidden');
+      
+      // Mostrar animación de introducción
+      elements.introAnimationText.classList.remove('hidden');
+      elements.introAnimationText.classList.add('animate-fade-in-out');
+      
+      gameState.phase = 'introAnimation';
+      gameState.globalTime = 0;
+      
+      // Iniciar juego después de la animación
+      setTimeout(() => {
+        elements.introAnimationText.classList.remove('animate-fade-in-out');
+        elements.introAnimationText.classList.add('hidden');
+        
+        gameState.phase = 'playing';
+        resetGameStats();
+        startRound(0);
+      }, 2000);
+    }
 
-                // Restaura el mainCircle.radius original
-                mainCircle.radius = originalMainCircleRadius;
-
-                if (elapsed >= INTRO_ANIMATION_DURATION) {
-                    elements.introAnimationText.classList.remove('animate-intro'); // Elimina la clase para permitir la re-animación
-                    elements.introAnimationText.classList.add('hidden'); // Oculta el texto de introducción
-                    gameState.phase = 'playing';
-                    gameState.startTime = gameState.globalTime;
-                    resetGameStats();
-                    startRound(0);
-                    setTimeout(hideGameInfoText, 5000);
-                }
-            }
-
-            // Aplica el efecto de shader si está habilitado, al final del dibujo
-            if (gameState.activeShader === 'invert') {
-                ctx.filter = 'invert(100%)';
-            } else if (gameState.activeShader === 'chromatic_glow') {
-                applyChromaticGlowShader();
-            } else {
-                ctx.filter = 'none';
-            }
-          }
+    // --- Actualización del Juego ---
+    function updateGame() {
+      if (gameState.phase !== 'playing') return;
+      
+      gameState.globalTime += engine.getDeltaTime();
+      
+      // Actualizar elementos del juego
+      updatePlayer();
+      updateMarkers();
+      
+      // Actualizar efecto de pulso del círculo central
+      if (gameState.centralReelPulseScale > 1) {
+        gameState.centralReelPulseScale -= (gameState.centralReelPulseScale - 1) * 0.3;
+        if (gameState.centralReelPulseScale < 1.005) gameState.centralReelPulseScale = 1;
+        
+        // Aplicar escala al círculo principal
+        mainCircleMesh.scaling.set(
+          gameState.centralReelPulseScale,
+          gameState.centralReelPulseScale,
+          gameState.centralReelPulseScale
+        );
       }
     }
 
-
-    // --- Settings Functions ---
-    /**
-     * Establece el renderizador.
-     * @param {string} renderer - El renderizador a usar ('2d' o 'webgl').
-     */
-    function setRenderer(renderer) {
-        // Limpia el contexto anterior
-        if (gameState.currentRenderer === 'webgl' && gl) {
-            // Intentar perder el contexto para una limpieza completa
-            const loseContextExtension = gl.getExtension('WEBGL_lose_context');
-            if (loseContextExtension) {
-                loseContextExtension.loseContext();
-            }
-            gl = null; // Asegurarse de que gl sea nulo después de intentar perder el contexto
-        }
-        
-        if (renderer === 'webgl') {
-            if (!initWebGL()) {
-                console.error('Falló la inicialización de WebGL, volviendo a Canvas 2D');
-                renderer = '2d'; // Forzar el renderizador a 2D si WebGL falla
-            }
-        }
-        
-        if (renderer === '2d') {
-            ctx = canvas.getContext('2d');
-            if (ctx) {
-                ctx.imageSmoothingEnabled = gameState.imageSmoothingEnabled;
-            }
-            gl = null; // Asegurarse de que gl sea nulo si estamos en 2D
-        }
-        
-        gameState.currentRenderer = renderer;
-        setCanvasSize();
-        saveSettings();
-        updateSettingsUI();
-    }
-
-    /**
-     * Establece la calidad de los gráficos y actualiza los parámetros relacionados.
-     * @param {string} quality - La calidad de gráficos deseada ('low', 'medium', 'high').
-     */
-    function setGraphicsQuality(quality) {
-        gameState.currentGraphicsQuality = quality;
-        NUM_BACKGROUND_SQUARES = GRAPHICS_SETTINGS[quality].squares;
-        PARTICLES_COUNT = GRAPHICS_SETTINGS[quality].particles;
-        NUM_BACKGROUND_LINES = GRAPHICS_SETTINGS[quality].lines; // Actualiza el recuento de líneas
-        initializeBackgroundElements(); // Reinicializa los elementos con los nuevos recuentos
-        updateSettingsUI(); // Actualiza el botón activo en la UI
-        saveSettings(); // Guarda la configuración después del cambio
-    }
-
-    /**
-     * Establece la dificultad del juego.
-     * @param {string} difficulty - La dificultad deseada ('easy', 'normal', 'hard').
-     */
-    function setDifficulty(difficulty) {
-        gameState.currentDifficulty = difficulty;
-        updateSettingsUI(); // Actualiza el botón activo en la UI
-        saveSettings(); // Guarda la configuración después del cambio
-    }
-
-    /**
-     * Establece el efecto de shader activo.
-     * @param {string} effectType - El tipo de shader a activar ('none', 'invert', 'chromatic_glow').
-     */
-    function setShaderEffect(effectType) {
-        gameState.activeShader = effectType;
-        updateSettingsUI(); // Actualiza el botón activo en la UI
-        saveSettings(); // Guarda la configuración después del cambio
-    }
-
-    /**
-     * Establece el modo de color para el juego.
-     * @param {string} mode - El modo de color deseado ('per_round', 'rainbow', 'monochromatic').
-     */
-    function setColorMode(mode) {
-        gameState.colorMode = mode;
-        // The setInterval for rainbow mode is removed as color updates are now tied to player rotation.
-        // No need to clear interval here.
-        updateSettingsUI(); // Actualiza el botón activo en la UI
-        saveSettings(); // Guarda la configuración después del cambio
-    }
-
-    /**
-     * Establece el modo de anti-aliasing para Canvas 2D.
-     * @param {boolean} enabled - Verdadero para anti-aliasing suave, falso para pixelado.
-     */
-    function setImageSmoothing(enabled) {
-        gameState.imageSmoothingEnabled = enabled;
-        if (gameState.currentRenderer === '2d' && ctx) {
-            ctx.imageSmoothingEnabled = enabled;
-        }
-        updateSettingsUI();
-        saveSettings();
-    }
-
-    /**
-     * Establece el modo de anti-aliasing para WebGL.
-     * @param {string} mode - El modo de anti-aliasing a activar ('none', 'msaa_x2', 'fxaa').
-     */
-    function setAntiAliasing(mode) {
-        if (gameState.currentAntiAliasing === mode) return; // No change needed
-
-        // If switching to MSAA or FXAA, or from them, re-initialize WebGL context
-        const requiresReinit = (mode === 'msaa_x2' || mode === 'fxaa' || gameState.currentAntiAliasing === 'msaa_x2' || gameState.currentAntiAliasing === 'fxaa');
-
-        gameState.currentAntiAliasing = mode;
-        if (requiresReinit && gameState.currentRenderer === 'webgl') {
-            // Force re-initialization of WebGL context
-            setRenderer('webgl'); // This will call initWebGL internally and clean up
-        } else if (gameState.currentRenderer === '2d') {
-            // If in 2D mode, just update the setting, it will apply if they switch to WebGL later
-            updateSettingsUI();
-            saveSettings();
-        } else { // Already in WebGL, but not switching AA modes that require full reinit
-            updateSettingsUI();
-            saveSettings();
-        }
-    }
-
-    /** Actualiza la clase 'active' para los botones en la UI de configuración. */
-    function updateSettingsUI() {
-        // Botones de renderizador
-        elements.renderer2d.classList.toggle('active', gameState.currentRenderer === '2d');
-        elements.rendererWebGL.classList.toggle('active', gameState.currentRenderer === 'webgl');
-
-        // Botones de gráficos
-        elements.graphicsLow.classList.toggle('active', gameState.currentGraphicsQuality === 'low');
-        elements.graphicsMedium.classList.toggle('active', gameState.currentGraphicsQuality === 'medium');
-        elements.graphicsHigh.classList.toggle('active', gameState.currentGraphicsQuality === 'high');
-
-        // Botones de dificultad
-        elements.difficultyEasy.classList.toggle('active', gameState.currentDifficulty === 'easy');
-        elements.difficultyNormal.classList.toggle('active', gameState.currentDifficulty === 'normal');
-        elements.difficultyHard.classList.toggle('active', gameState.currentDifficulty === 'hard');
-
-        // Botones de shader
-        elements.shaderOff.classList.toggle('active', gameState.activeShader === 'none');
-        elements.shaderInvert.classList.toggle('active', gameState.activeShader === 'invert');
-        elements.shaderChromaticGlow.classList.toggle('active', gameState.activeShader === 'chromatic_glow');
-
-        // Botones de modo de color
-        elements.colorModePerRound.classList.toggle('active', gameState.colorMode === 'per_round');
-        elements.colorModeRainbow.classList.toggle('active', gameState.colorMode === 'rainbow');
-        elements.colorModeMonochromatic.classList.toggle('active', gameState.colorMode === 'monochromatic'); // New monochromatic button
-
-        // 2D Anti-Aliasing buttons
-        elements.imageSmoothingSmooth.classList.toggle('active', gameState.imageSmoothingEnabled === true);
-        elements.imageSmoothingPixelated.classList.toggle('active', gameState.imageSmoothingEnabled === false);
-
-        // WebGL Anti-Aliasing buttons
-        elements.antiAliasingNone.classList.toggle('active', gameState.currentAntiAliasing === 'none');
-        elements.antiAliasingMSAAx2.classList.toggle('active', gameState.currentAntiAliasing === 'msaa_x2');
-        elements.antiAliasingFXAA.classList.toggle('active', gameState.currentAntiAliasing === 'fxaa');
-    }
-
-    /** Hides the game info text after a delay. */
-    function hideGameInfoText() {
-        elements.gameInfoText.classList.add('hidden');
-    }
-
-    /** Shows the game info text. */
-    function showGameInfoText() {
-        elements.gameInfoText.classList.remove('hidden');
-    }
-
-    // --- LocalStorage Functions ---
-    /** Guarda la configuración actual del juego en localStorage. */
-    function saveSettings() {
-        const settings = {
-            renderer: gameState.currentRenderer,
-            graphics: gameState.currentGraphicsQuality,
-            difficulty: gameState.currentDifficulty,
-            shader: gameState.activeShader,
-            colorMode: gameState.colorMode,
-            imageSmoothingEnabled: gameState.imageSmoothingEnabled, // Save new 2D AA setting
-            antiAliasing: gameState.currentAntiAliasing // Save WebGL AA setting
-        };
-        localStorage.setItem('rpcgSettings', JSON.stringify(settings));
-    }
-
-    /** Carga la configuración del juego desde localStorage. */
-    function loadSettings() {
-        const savedSettings = localStorage.getItem('rpcgSettings');
-        if (savedSettings) {
-            const settings = JSON.parse(savedSettings);
-            // Aplica la configuración cargada, asegurando los valores predeterminados si falta una configuración
-            setImageSmoothing(settings.imageSmoothingEnabled !== undefined ? settings.imageSmoothingEnabled : true); // Load 2D AA setting first
-            setRenderer(settings.renderer || '2d'); // This will apply imageSmoothingEnabled if 2D
-            setGraphicsQuality(settings.graphics || 'medium');
-            setDifficulty(settings.difficulty || 'normal');
-            setShaderEffect(settings.shader || 'none');
-            setColorMode(settings.colorMode || 'rainbow');
-            setAntiAliasing(settings.antiAliasing || 'none'); // Load WebGL AA setting
-        } else {
-            // Apply initial defaults if no settings are saved
-            setImageSmoothing(true); // Default for 2D anti-aliasing
-            setRenderer('2d');
-            setGraphicsQuality('medium');
-            setDifficulty('normal');
-            setShaderEffect('none');
-            setColorMode('rainbow');
-            setAntiAliasing('none'); // Default for new users
-        }
-        updateSettingsUI(); // Ensure UI reflects loaded settings
-    }
-
-    // --- Event Listener Handlers ---
-    /** Maneja la entrada de juego (barra espaciadora o toque). */
-    function handleGameplayInput() {
-        const currentTime = performance.now();
-        if (currentTime - lastGameplayInputTime < GAMEPLAY_INPUT_COOLDOWN) {
-            return; 
-        }
-        lastGameplayInputTime = currentTime;
-        checkHit();
-        document.querySelectorAll('.hud-item').forEach(item => {
-            item.classList.add('animate-pulse');
-            setTimeout(() => item.classList.remove('animate-pulse'), 300);
-        });
-    }
-
-    function handleKeyDown(e) {
-        if (e.code === 'Escape') {
-            if (gameState.phase === 'playing') {
-                gameState.phase = 'paused';
-                elements.pauseMenu.classList.remove('hidden');
-                elements.gameInfoText.classList.add('hidden'); 
-            } else if (gameState.phase === 'paused') {
-                gameState.phase = 'playing';
-                elements.pauseMenu.classList.add('hidden');
-            }
-            return;
-        }
-
-        if (e.code === 'Space') {
-            if (isSpacePressed) {
-                return;
-            }
-            isSpacePressed = true;
-            
-            if (gameState.phase === 'menu') {
-                elements.startMenu.classList.add('hidden');
-                elements.introAnimationText.classList.remove('hidden');
-                elements.introAnimationText.classList.add('animate-intro'); // Inicia la animación
-                gameState.phase = 'introAnimation';
-                gameState.introAnimationStartTime = gameState.globalTime;
-                // La lógica de inicio del juego se manejará después de que la animación de introducción se complete
-            } else if (gameState.phase === 'playing') {
-                handleGameplayInput(); // Llama al manejador centralizado de entrada de juego
-            }
-            e.preventDefault();
-        }
-    }
-
-    function handleKeyUp(e) {
-        if (e.code === 'Space') {
-            isSpacePressed = false;
-        }
-    }
-
-    function handleTouch(e) {
-        if (gameState.phase === 'playing') {
-            e.preventDefault(); // Evita el comportamiento táctil predeterminado (ej. desplazamiento, zoom)
-            handleGameplayInput(); // Llama al manejador centralizado de entrada de juego
-        } else if (gameState.phase === 'menu') {
-             // Maneja el toque en el botón de reproducción en el menú
-            if (e.target === elements.playButton) {
-                elements.startMenu.classList.add('hidden');
-                elements.introAnimationText.classList.remove('hidden');
-                elements.introAnimationText.classList.add('animate-intro'); // Inicia la animación
-                gameState.phase = 'introAnimation';
-                gameState.introAnimationStartTime = gameState.globalTime;
-                e.preventDefault();
-            }
-        }
-    }
-
-    // --- Event Listener Attachments ---
+    // --- Configuración de Eventos ---
     function setupEventListeners() {
-        document.addEventListener('keydown', handleKeyDown);
-        document.addEventListener('keyup', handleKeyUp);
-        document.body.addEventListener('touchstart', handleTouch);
-    }
-
-    // Función auxiliar para adjuntar oyentes de clic y touchstart a los botones
-    function attachButtonListeners(buttonElement, handlerFunction) {
-        buttonElement.addEventListener('click', handlerFunction);
-        buttonElement.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Evita el comportamiento táctil predeterminado (ej. clics fantasma)
-            handlerFunction(e); // Ejecuta la acción del botón
-        });
-    }
-
-    // Adjunta oyentes a los botones del menú principal
-    attachButtonListeners(elements.playButton, () => {
+      // Teclado
+      document.addEventListener('keydown', handleKeyDown);
+      document.addEventListener('keyup', handleKeyUp);
+      
+      // Touch
+      document.body.addEventListener('touchstart', handleTouch);
+      
+      // Botones del menú principal
+      attachButtonListeners(elements.playButton, () => {
         elements.startMenu.classList.add('hidden');
-        elements.introAnimationText.classList.remove('hidden');
-        elements.introAnimationText.classList.add('animate-intro'); // Inicia la animación
-        gameState.phase = 'introAnimation';
-        gameState.introAnimationStartTime = gameState.globalTime;
-    });
-    attachButtonListeners(elements.settingsButton, () => {
+        restartGame();
+      });
+      
+      attachButtonListeners(elements.settingsButton, () => {
         elements.startMenu.classList.add('hidden');
         elements.settingsMenu.classList.remove('hidden');
         gameState.phase = 'settings';
-        updateSettingsUI();
-    });
-    attachButtonListeners(elements.backToMainMenuButton, () => {
+      });
+      
+      attachButtonListeners(elements.aboutButton, () => {
+        customAlert('Acerca de', 'Juego de Ritmo Psico Minimalista\nDesarrollado con Babylon.js y Tailwind CSS\nPor RetrogisusDEV\nv1.0.0');
+      });
+      
+      // Botón volver al menú principal
+      attachButtonListeners(elements.backToMainMenuButton, () => {
         elements.settingsMenu.classList.add('hidden');
         elements.startMenu.classList.remove('hidden');
         gameState.phase = 'menu';
-        resetGameStats(); // Reinicia las estadísticas al volver al menú principal
-        showGameInfoText(); // Muestra el texto de información al volver al menú principal
-    });
-    attachButtonListeners(elements.aboutButton, () => {
-        customAlert('Acerca de', 'Juego de Ritmo Psico Minimalista\nDesarrollado con amor y colores pastel.\nPor RetrogisusDEV\nv0.1.0');
-    });
-
-    // Adjunta oyentes a los botones del menú de pausa
-    attachButtonListeners(elements.continueButton, () => {
+      });
+      
+      // Botones del menú de pausa
+      attachButtonListeners(elements.continueButton, () => {
         gameState.phase = 'playing';
         elements.pauseMenu.classList.add('hidden');
-    });
-    attachButtonListeners(elements.restartButton, () => {
-        restartGame(); // Use the new restartGame function
-    });
-    attachButtonListeners(elements.exitToMenuButton, () => {
+      });
+      
+      attachButtonListeners(elements.restartButton, () => {
+        restartGame();
+      });
+      
+      attachButtonListeners(elements.exitToMenuButton, () => {
         elements.pauseMenu.classList.add('hidden');
         elements.startMenu.classList.remove('hidden');
         gameState.phase = 'menu';
-        resetGameStats(); // Reinicia las estadísticas al volver al menú principal
-        showGameInfoText(); // Muestra el texto de información al volver al menú principal
-    });
-
-    // Adjunta oyente al botón de cerrar alerta personalizada
-    attachButtonListeners(elements.customAlertCloseButton, hideCustomAlert);
-
-    // Adjunta oyentes a los botones de configuración del renderizador
-    attachButtonListeners(elements.renderer2d, () => setRenderer('2d'));
-    attachButtonListeners(elements.rendererWebGL, () => setRenderer('webgl'));
-
-    // Adjunta oyentes a los botones de configuración de gráficos
-    attachButtonListeners(elements.graphicsLow, () => setGraphicsQuality('low'));
-    attachButtonListeners(elements.graphicsMedium, () => setGraphicsQuality('medium'));
-    attachButtonListeners(elements.graphicsHigh, () => setGraphicsQuality('high'));
-
-    // Adjunta oyentes a los botones de configuración de dificultad
-    attachButtonListeners(elements.difficultyEasy, () => setDifficulty('easy'));
-    attachButtonListeners(elements.difficultyNormal, () => setDifficulty('normal'));
-    attachButtonListeners(elements.difficultyHard, () => setDifficulty('hard'));
-
-    // Adjunta oyentes a los botones de configuración de shader
-    attachButtonListeners(elements.shaderOff, () => setShaderEffect('none'));
-    attachButtonListeners(elements.shaderInvert, () => setShaderEffect('invert'));
-    attachButtonListeners(elements.shaderChromaticGlow, () => setShaderEffect('chromatic_glow'));
-
-    // Adjunta oyentes a los nuevos botones de modo de color
-    attachButtonListeners(elements.colorModePerRound, () => setColorMode('per_round'));
-    attachButtonListeners(elements.colorModeRainbow, () => setColorMode('rainbow'));
-    attachButtonListeners(elements.colorModeMonochromatic, () => setColorMode('monochromatic')); // Attach listener for new monochromatic button
-
-    // Adjunta oyentes a los nuevos botones de anti-aliasing 2D
-    attachButtonListeners(elements.imageSmoothingSmooth, () => setImageSmoothing(true));
-    attachButtonListeners(elements.imageSmoothingPixelated, () => setImageSmoothing(false));
-
-    // Attach listeners to WebGL anti-aliasing buttons
-    attachButtonListeners(elements.antiAliasingNone, () => setAntiAliasing('none'));
-    attachButtonListeners(elements.antiAliasingMSAAx2, () => setAntiAliasing('msaa_x2'));
-    attachButtonListeners(elements.antiAliasingFXAA, () => setAntiAliasing('fxaa'));
-
-    // Adjunta oyente al botón Jugar de Nuevo
-    attachButtonListeners(elements.playAgainButton, () => {
+        resetGameStats();
+      });
+      
+      // Botón jugar de nuevo
+      attachButtonListeners(elements.playAgainButton, () => {
         elements.scoreScreen.classList.add('hidden');
         elements.startMenu.classList.remove('hidden');
         gameState.phase = 'menu';
         resetGameStats();
-        showGameInfoText();
-    });
+      });
+      
+      // Botón cerrar alerta
+      attachButtonListeners(elements.customAlertCloseButton, hideCustomAlert);
+      
+      // Botones de configuración
+      attachButtonListeners(elements.graphicsLow, () => setGraphicsQuality('low'));
+      attachButtonListeners(elements.graphicsMedium, () => setGraphicsQuality('medium'));
+      attachButtonListeners(elements.graphicsHigh, () => setGraphicsQuality('high'));
+      
+      attachButtonListeners(elements.difficultyEasy, () => setDifficulty('easy'));
+      attachButtonListeners(elements.difficultyNormal, () => setDifficulty('normal'));
+      attachButtonListeners(elements.difficultyHard, () => setDifficulty('hard'));
+      
+      attachButtonListeners(elements.shaderOff, () => setShaderEffect('none'));
+      attachButtonListeners(elements.shaderBloom, () => setShaderEffect('bloom'));
+      attachButtonListeners(elements.shaderGlow, () => setShaderEffect('glow'));
+      
+      attachButtonListeners(elements.colorModePerRound, () => setColorMode('per_round'));
+      attachButtonListeners(elements.colorModeRainbow, () => setColorMode('rainbow'));
+      attachButtonListeners(elements.colorModeMonochromatic, () => setColorMode('monochromatic'));
+    }
+
+    function attachButtonListeners(buttonElement, handlerFunction) {
+      buttonElement.addEventListener('click', handlerFunction);
+      buttonElement.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        handlerFunction(e);
+      });
+    }
+
+    function handleKeyDown(e) {
+      if (e.code === 'Escape') {
+        if (gameState.phase === 'playing') {
+          gameState.phase = 'paused';
+          elements.pauseMenu.classList.remove('hidden');
+        } else if (gameState.phase === 'paused') {
+          gameState.phase = 'playing';
+          elements.pauseMenu.classList.add('hidden');
+        }
+        return;
+      }
+      
+      if (e.code === 'Space') {
+        if (gameState.phase === 'menu') {
+          elements.startMenu.classList.add('hidden');
+          restartGame();
+        } else if (gameState.phase === 'playing') {
+          checkHit();
+        }
+        e.preventDefault();
+      }
+    }
+
+    function handleKeyUp(e) {
+      // Implementar si es necesario
+    }
+
+    function handleTouch(e) {
+      if (gameState.phase === 'playing') {
+        e.preventDefault();
+        checkHit();
+      }
+    }
+
+    // --- Funciones de Configuración ---
+    function setGraphicsQuality(quality) {
+      gameState.currentGraphicsQuality = quality;
+      updateSettingsUI();
+      saveSettings();
+    }
+
+    function setDifficulty(difficulty) {
+      gameState.currentDifficulty = difficulty;
+      updateSettingsUI();
+      saveSettings();
+    }
+
+    function setShaderEffect(effect) {
+      gameState.activeShader = effect;
+      setupPostProcessing();
+      updateSettingsUI();
+      saveSettings();
+    }
+
+    function setColorMode(mode) {
+      gameState.colorMode = mode;
+      updateSettingsUI();
+      saveSettings();
+    }
+
+    function updateSettingsUI() {
+      // Actualizar botones de calidad gráfica
+      elements.graphicsLow.classList.toggle('bg-green-300', gameState.currentGraphicsQuality === 'low');
+      elements.graphicsLow.classList.toggle('text-gray-900', gameState.currentGraphicsQuality === 'low');
+      elements.graphicsLow.classList.toggle('border-blue-200', gameState.currentGraphicsQuality === 'low');
+      elements.graphicsLow.classList.toggle('bg-gray-600', gameState.currentGraphicsQuality !== 'low');
+      elements.graphicsLow.classList.toggle('text-white', gameState.currentGraphicsQuality !== 'low');
+      elements.graphicsLow.classList.toggle('border-gray-500', gameState.currentGraphicsQuality !== 'low');
+      
+      elements.graphicsMedium.classList.toggle('bg-green-300', gameState.currentGraphicsQuality === 'medium');
+      elements.graphicsMedium.classList.toggle('text-gray-900', gameState.currentGraphicsQuality === 'medium');
+      elements.graphicsMedium.classList.toggle('border-blue-200', gameState.currentGraphicsQuality === 'medium');
+      elements.graphicsMedium.classList.toggle('bg-gray-600', gameState.currentGraphicsQuality !== 'medium');
+      elements.graphicsMedium.classList.toggle('text-white', gameState.currentGraphicsQuality !== 'medium');
+      elements.graphicsMedium.classList.toggle('border-gray-500', gameState.currentGraphicsQuality !== 'medium');
+      
+      elements.graphicsHigh.classList.toggle('bg-green-300', gameState.currentGraphicsQuality === 'high');
+      elements.graphicsHigh.classList.toggle('text-gray-900', gameState.currentGraphicsQuality === 'high');
+      elements.graphicsHigh.classList.toggle('border-blue-200', gameState.currentGraphicsQuality === 'high');
+      elements.graphicsHigh.classList.toggle('bg-gray-600', gameState.currentGraphicsQuality !== 'high');
+      elements.graphicsHigh.classList.toggle('text-white', gameState.currentGraphicsQuality !== 'high');
+      elements.graphicsHigh.classList.toggle('border-gray-500', gameState.currentGraphicsQuality !== 'high');
+      
+      // Actualizar botones de dificultad
+      elements.difficultyEasy.classList.toggle('bg-green-300', gameState.currentDifficulty === 'easy');
+      elements.difficultyEasy.classList.toggle('text-gray-900', gameState.currentDifficulty === 'easy');
+      elements.difficultyEasy.classList.toggle('border-blue-200', gameState.currentDifficulty === 'easy');
+      elements.difficultyEasy.classList.toggle('bg-gray-600', gameState.currentDifficulty !== 'easy');
+      elements.difficultyEasy.classList.toggle('text-white', gameState.currentDifficulty !== 'easy');
+      elements.difficultyEasy.classList.toggle('border-gray-500', gameState.currentDifficulty !== 'easy');
+      
+      elements.difficultyNormal.classList.toggle('bg-green-300', gameState.currentDifficulty === 'normal');
+      elements.difficultyNormal.classList.toggle('text-gray-900', gameState.currentDifficulty === 'normal');
+      elements.difficultyNormal.classList.toggle('border-blue-200', gameState.currentDifficulty === 'normal');
+      elements.difficultyNormal.classList.toggle('bg-gray-600', gameState.currentDifficulty !== 'normal');
+      elements.difficultyNormal.classList.toggle('text-white', gameState.currentDifficulty !== 'normal');
+      elements.difficultyNormal.classList.toggle('border-gray-500', gameState.currentDifficulty !== 'normal');
+      
+      elements.difficultyHard.classList.toggle('bg-green-300', gameState.currentDifficulty === 'hard');
+      elements.difficultyHard.classList.toggle('text-gray-900', gameState.currentDifficulty === 'hard');
+      elements.difficultyHard.classList.toggle('border-blue-200', gameState.currentDifficulty === 'hard');
+      elements.difficultyHard.classList.toggle('bg-gray-600', gameState.currentDifficulty !== 'hard');
+      elements.difficultyHard.classList.toggle('text-white', gameState.currentDifficulty !== 'hard');
+      elements.difficultyHard.classList.toggle('border-gray-500', gameState.currentDifficulty !== 'hard');
+      
+      // Actualizar botones de efectos
+      elements.shaderOff.classList.toggle('bg-green-300', gameState.activeShader === 'none');
+      elements.shaderOff.classList.toggle('text-gray-900', gameState.activeShader === 'none');
+      elements.shaderOff.classList.toggle('border-blue-200', gameState.activeShader === 'none');
+      elements.shaderOff.classList.toggle('bg-gray-600', gameState.activeShader !== 'none');
+      elements.shaderOff.classList.toggle('text-white', gameState.activeShader !== 'none');
+      elements.shaderOff.classList.toggle('border-gray-500', gameState.activeShader !== 'none');
+      
+      elements.shaderBloom.classList.toggle('bg-green-300', gameState.activeShader === 'bloom');
+      elements.shaderBloom.classList.toggle('text-gray-900', gameState.activeShader === 'bloom');
+      elements.shaderBloom.classList.toggle('border-blue-200', gameState.activeShader === 'bloom');
+      elements.shaderBloom.classList.toggle('bg-gray-600', gameState.activeShader !== 'bloom');
+      elements.shaderBloom.classList.toggle('text-white', gameState.activeShader !== 'bloom');
+      elements.shaderBloom.classList.toggle('border-gray-500', gameState.activeShader !== 'bloom');
+      
+      elements.shaderGlow.classList.toggle('bg-green-300', gameState.activeShader === 'glow');
+      elements.shaderGlow.classList.toggle('text-gray-900', gameState.activeShader === 'glow');
+      elements.shaderGlow.classList.toggle('border-blue-200', gameState.activeShader === 'glow');
+      elements.shaderGlow.classList.toggle('bg-gray-600', gameState.activeShader !== 'glow');
+      elements.shaderGlow.classList.toggle('text-white', gameState.activeShader !== 'glow');
+      elements.shaderGlow.classList.toggle('border-gray-500', gameState.activeShader !== 'glow');
+      
+      // Actualizar botones de modo de color
+      elements.colorModePerRound.classList.toggle('bg-green-300', gameState.colorMode === 'per_round');
+      elements.colorModePerRound.classList.toggle('text-gray-900', gameState.colorMode === 'per_round');
+      elements.colorModePerRound.classList.toggle('border-blue-200', gameState.colorMode === 'per_round');
+      elements.colorModePerRound.classList.toggle('bg-gray-600', gameState.colorMode !== 'per_round');
+      elements.colorModePerRound.classList.toggle('text-white', gameState.colorMode !== 'per_round');
+      elements.colorModePerRound.classList.toggle('border-gray-500', gameState.colorMode !== 'per_round');
+      
+      elements.colorModeRainbow.classList.toggle('bg-green-300', gameState.colorMode === 'rainbow');
+      elements.colorModeRainbow.classList.toggle('text-gray-900', gameState.colorMode === 'rainbow');
+      elements.colorModeRainbow.classList.toggle('border-blue-200', gameState.colorMode === 'rainbow');
+      elements.colorModeRainbow.classList.toggle('bg-gray-600', gameState.colorMode !== 'rainbow');
+      elements.colorModeRainbow.classList.toggle('text-white', gameState.colorMode !== 'rainbow');
+      elements.colorModeRainbow.classList.toggle('border-gray-500', gameState.colorMode !== 'rainbow');
+      
+      elements.colorModeMonochromatic.classList.toggle('bg-green-300', gameState.colorMode === 'monochromatic');
+      elements.colorModeMonochromatic.classList.toggle('text-gray-900', gameState.colorMode === 'monochromatic');
+      elements.colorModeMonochromatic.classList.toggle('border-blue-200', gameState.colorMode === 'monochromatic');
+      elements.colorModeMonochromatic.classList.toggle('bg-gray-600', gameState.colorMode !== 'monochromatic');
+      elements.colorModeMonochromatic.classList.toggle('text-white', gameState.colorMode !== 'monochromatic');
+      elements.colorModeMonochromatic.classList.toggle('border-gray-500', gameState.colorMode !== 'monochromatic');
+    }
+
+    // --- Almacenamiento Local ---
+    function saveSettings() {
+      const settings = {
+        graphics: gameState.currentGraphicsQuality,
+        difficulty: gameState.currentDifficulty,
+        shader: gameState.activeShader,
+        colorMode: gameState.colorMode
+      };
+      localStorage.setItem('rpcgSettings', JSON.stringify(settings));
+    }
+
+    function loadSettings() {
+      const savedSettings = localStorage.getItem('rpcgSettings');
+      if (savedSettings) {
+        const settings = JSON.parse(savedSettings);
+        setGraphicsQuality(settings.graphics || 'medium');
+        setDifficulty(settings.difficulty || 'normal');
+        setShaderEffect(settings.shader || 'none');
+        setColorMode(settings.colorMode || 'rainbow');
+      }
+      updateSettingsUI();
+    }
 
     // --- Inicialización ---
-    window.addEventListener('resize', setCanvasSize);
-    
-    // Manejadores de pérdida de contexto WebGL
-    canvas.addEventListener('webglcontextlost', (event) => {
-        event.preventDefault();
-        console.warn('Contexto WebGL perdido');
-        cancelAnimationFrame(animationFrameId); // Cancel the animation frame
-        gameState.phase = 'paused';
-        elements.pauseMenu.classList.remove('hidden');
-        customAlert('Advertencia', 'El contexto WebGL se ha perdido. Intentando restaurar...');
-    });
-    
-    canvas.addEventListener('webglcontextrestored', () => {
-        console.log('Contexto WebGL restaurado');
-        if (gameState.currentRenderer === 'webgl') {
-            setRenderer('webgl'); // Re-initialize WebGL context and resources
-        }
-        if (gameState.phase === 'paused') { // Only if paused due to context loss
-            gameState.phase = 'playing';
-            elements.pauseMenu.classList.add('hidden');
-        }
-        customAlert('Información', 'El contexto WebGL ha sido restaurado.');
-        animationFrameId = requestAnimationFrame(draw); // Restart the animation loop
+    window.addEventListener('DOMContentLoaded', () => {
+      // Inicializar Babylon.js
+      initBabylon();
+      
+      // Cargar configuración
+      loadSettings();
+      
+      // Configurar eventos
+      setupEventListeners();
+      
+      // Verificar orientación
+      checkOrientation();
+      window.addEventListener('resize', checkOrientation);
     });
 
-    loadSettings(); // Carga la configuración de localStorage al inicio
-    setupEventListeners(); // Configura los oyentes de eventos globales
-    animationFrameId = requestAnimationFrame(draw); // Inicia el bucle de animación y almacena el ID
+    function checkOrientation() {
+      if (window.innerHeight < 500 && window.innerWidth > window.innerHeight) {
+        elements.orientationWarning.classList.remove('hidden');
+      } else {
+        elements.orientationWarning.classList.add('hidden');
+      }
+    }
   </script>
 </body>
 
